@@ -24,12 +24,13 @@ struct body
 };
 
 // SDL2
-static const uint32_t window_width = 600;
-static const uint32_t window_height = 600;
+static const uint32_t window_width = 1000;
+static const uint32_t window_height = 1000;
 static SDL_Renderer  *renderer = NULL;
 // bodies
-static const double gravity = .000005;
+static const double gravity = .000002;
 #define BODIES_COUNT 30
+static struct body bodies_previous[BODIES_COUNT] = {0};
 static struct body bodies[BODIES_COUNT] = {0};
 
 void
@@ -57,6 +58,7 @@ two_bodies_force(struct body b1, struct body b2)
 void
 update_bodies(void)
 {
+    memcpy(bodies_previous, bodies, sizeof bodies);
     for (size_t i = 0; i < BODIES_COUNT; i++)
     {
         bodies[i].x += bodies[i].velocity_x;
@@ -69,9 +71,9 @@ update_bodies(void)
         {
             if (j == i)
                 continue;
-            double force = two_bodies_force(bodies[i], bodies[j]);
-            double dx = bodies[i].x - bodies[j].x;
-            double dy = bodies[i].y - bodies[j].y;
+            double force = two_bodies_force(bodies_previous[i], bodies_previous[j]);
+            double dx = bodies_previous[i].x - bodies_previous[j].x;
+            double dy = bodies_previous[i].y - bodies_previous[j].y;
             double magnitude = sqrt(dx * dx + dy * dy);
             dx /= magnitude;
             dy /= magnitude;
@@ -80,9 +82,6 @@ update_bodies(void)
             acceleration_x -= dx;
             acceleration_y -= dy;
         }
-        // FIXME: should have 2 bodies array because I'm computing the force on
-        // already modified bodies rn (small inaccuracy, doesn't show in the
-        // visualization)
         bodies[i].velocity_x += acceleration_x;
         bodies[i].velocity_y += acceleration_y;
     }
@@ -96,15 +95,8 @@ draw_bodies(void)
     {
         uint32_t window_x = bodies[i].x * (double)window_width;
         uint32_t window_y = bodies[i].y * (double)window_height;
-        SDL_Rect r = {
-            .x = window_x,
-            .y = window_y,
-            .w = 30 * bodies[i].mass,
-            .h = 30 * bodies[i].mass,
-        };
-        // SDL_RenderFillRect(renderer, &r);
-        aacircleRGBA(
-            renderer, window_x, window_y, 30 * bodies[i].mass, 255, 255, 255, 255);
+        uint32_t radius = 30 * bodies[i].mass;
+        aacircleRGBA(renderer, window_x, window_y, radius, 255, 255, 255, 255);
     }
 }
 
@@ -125,8 +117,7 @@ main(void)
     {
         bodies[i].x = frand();
         bodies[i].y = frand();
-        bodies[i].mass = frand();
-        // bodies[i].mass = 1.0;
+        bodies[i].mass = frand() + 0.3;
         bodies[i].velocity_x = (frand() - 0.5) / 500;
         bodies[i].velocity_y = (frand() - 0.5) / 500;
     }
@@ -165,7 +156,7 @@ main(void)
         update_bodies();
         draw_bodies();
         SDL_RenderPresent(renderer);
-        SDL_Delay(20);
+        SDL_Delay(10);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
