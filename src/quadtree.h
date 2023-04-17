@@ -46,6 +46,9 @@ quadtree_insert(struct quadtree *quadtree, struct body body);
 void
 quadtree_update_mass(struct quadtree *quadtree);
 void
-quadtree_force(struct quadtree *quadtree, struct body body, double *force_x, double *force_y);
+quadtree_force(const struct quadtree *quadtree,
+               const struct body     *body,
+               double                *force_x,
+               double                *force_y);
 
 #endif

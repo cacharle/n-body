@@ -23,7 +23,7 @@ static const uint32_t window_height = 1000;
 static SDL_Renderer  *renderer = NULL;
 static const char    *font_path = "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf";
 // bodies
-#define BODIES_COUNT 9300
+#define BODIES_COUNT 14000
 static struct body bodies_previous[BODIES_COUNT] = {0};
 static struct body bodies[BODIES_COUNT] = {0};
 
@@ -50,7 +50,7 @@ body_acceleration(struct body *body)
             fabs(body->y - bodies_previous[j].y) < 0.03)
             continue;
         double force_x, force_y;
-        body_gravitational_force(*body, bodies_previous[j], &force_x, &force_y);
+        body_gravitational_force(body, &bodies_previous[j], &force_x, &force_y);
         acceleration_x_ -= force_x;
         acceleration_y_ -= force_y;
     }
@@ -75,7 +75,7 @@ update_bodies(struct quadtree *quadtree)
     {
         // body_acceleration(&bodies[i]);
         double acceleration_x = 0.0, acceleration_y = 0.0;
-        quadtree_force(quadtree, bodies[i], &acceleration_x, &acceleration_y);
+        quadtree_force(quadtree, &bodies[i], &acceleration_x, &acceleration_y);
         bodies[i].velocity_y -= acceleration_y;
         bodies[i].velocity_x -= acceleration_x;
         bodies[i].x += bodies[i].velocity_x;
