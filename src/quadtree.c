@@ -1,4 +1,5 @@
 #include "quadtree.h"
+#include "body.h"
 
 static bool
 in_boundary(struct quadtree *quadtree, struct body body)
@@ -125,11 +126,40 @@ quadtree_update_mass(struct quadtree *quadtree)
     }
 }
 
-double
-quadtree_force(struct quadtree *quadtree, struct body body)
+static const double approximate_distance_threshold = 0.0;
+
+void
+quadtree_force(struct quadtree *quadtree, struct body body, double *force_x, double *force_y)
 {
-    // if outside threshold
-    //   use internal
-    // else
-    //   recursive apply
+    double area_width = fabs(quadtree->end_x - quadtree->start_x);
+    double distance_x = quadtree->center_of_mass_x - body.x;
+    double distance_y = quadtree->center_of_mass_y - body.y;
+    double distance = sqrt(distance_x * distance_x + distance_y * distance_y);
+    double ratio = area_width / distance;
+    printf("here %f\n", ratio);
+    if (ratio > approximate_distance_threshold)
+    {
+        body_gravitational_force(body,
+                                 (struct body){.x = quadtree->center_of_mass_x,
+                                               .y = quadtree->center_of_mass_y,
+                                               .mass = quadtree->total_mass},
+                                 force_x,
+                                 force_y);
+        return;
+    }
+    double nw_force_x, nw_force_y, ne_force_x, ne_force_y, sw_force_x, sw_force_y, se_force_x,
+        se_force_y;
+    switch (quadtree->type)
+    {
+    case QUADTREE_EMPTY: break;
+    case QUADTREE_EXTERNAL: body_gravitational_force(body, quadtree->body, force_x, force_y); break;
+    case QUADTREE_INTERNAL:
+        quadtree_force(quadtree->children.nw, body, &nw_force_x, &nw_force_y);
+        quadtree_force(quadtree->children.ne, body, &ne_force_x, &ne_force_y);
+        quadtree_force(quadtree->children.sw, body, &sw_force_x, &sw_force_y);
+        quadtree_force(quadtree->children.se, body, &se_force_x, &se_force_y);
+        *force_x = nw_force_x + ne_force_x + sw_force_x + se_force_x;
+        *force_y = nw_force_y + ne_force_y + sw_force_y + se_force_y;
+        break;
+    }
 }

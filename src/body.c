@@ -19,8 +19,18 @@ body_init_random(struct body *body)
 static const double gravity = .0000002;
 
 void
-body_gravitational_force(struct body b1, struct body b2, double *force_x, double *force_y)
+body_gravitational_force(const struct body b1,
+                         const struct body b2,
+                         double           *force_x,
+                         double           *force_y)
 {
+    if (fabs(b1.x - b2.x) < 0.03 ||
+        fabs(b1.y - b2.y) < 0.03)
+    {
+        *force_x = 0.0;
+        *force_y = 0.0;
+        return;
+    }
     double distance_x = b1.x - b2.x;
     double distance_y = b1.y - b2.y;
     double distance_square = distance_x * distance_x + distance_y * distance_y;
@@ -33,6 +43,14 @@ body_gravitational_force(struct body b1, struct body b2, double *force_x, double
     dy /= magnitude;
     dx *= force;
     dy *= force;
-    *force_x = dx;
-    *force_y = dy;
+    if (isnan(dx) || isnan(dy))
+    {
+        *force_x = 0.0;
+        *force_y = 0.0;
+    }
+    else
+    {
+        *force_x = dx;
+        *force_y = dy;
+    }
 }

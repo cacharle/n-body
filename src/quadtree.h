@@ -9,9 +9,9 @@
 
 enum quadtree_type
 {
-    QUADTREE_EMPTY,
-    QUADTREE_EXTERNAL,
-    QUADTREE_INTERNAL,
+    QUADTREE_EMPTY = 0,
+    QUADTREE_EXTERNAL = 1,
+    QUADTREE_INTERNAL = 2,
 };
 
 struct quadtree
@@ -45,5 +45,7 @@ void
 quadtree_insert(struct quadtree *quadtree, struct body body);
 void
 quadtree_update_mass(struct quadtree *quadtree);
+void
+quadtree_force(struct quadtree *quadtree, struct body body, double *force_x, double *force_y);
 
 #endif
