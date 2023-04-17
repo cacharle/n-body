@@ -24,12 +24,10 @@ body_gravitational_force(const struct body b1,
                          double           *force_x,
                          double           *force_y)
 {
+    *force_x = 0.0;
+    *force_y = 0.0;
     if (fabs(b1.x - b2.x) < 0.03 || fabs(b1.y - b2.y) < 0.03)
-    {
-        *force_x = 0.0;
-        *force_y = 0.0;
         return;
-    }
     double distance_x = b1.x - b2.x;
     double distance_y = b1.y - b2.y;
     double distance_square = distance_x * distance_x + distance_y * distance_y;
@@ -42,12 +40,7 @@ body_gravitational_force(const struct body b1,
     dy /= magnitude;
     dx *= force;
     dy *= force;
-    if (isnan(dx) || isnan(dy))
-    {
-        *force_x = 0.0;
-        *force_y = 0.0;
-    }
-    else
+    if (!isnan(dx) && !isnan(dy))
     {
         *force_x = dx;
         *force_y = dy;

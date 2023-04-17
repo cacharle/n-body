@@ -23,7 +23,7 @@ static const uint32_t window_height = 1000;
 static SDL_Renderer  *renderer = NULL;
 static const char    *font_path = "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf";
 // bodies
-#define BODIES_COUNT 8200
+#define BODIES_COUNT 9300
 static struct body bodies_previous[BODIES_COUNT] = {0};
 static struct body bodies[BODIES_COUNT] = {0};
 
@@ -57,6 +57,15 @@ body_acceleration(struct body *body)
     body->velocity_y += acceleration_y_;
     body->velocity_x += acceleration_x_;
 }
+
+// #define THREAD_POOL_COUNT 4
+// pthread_t thread_pool[THREAD_POOL_COUNT];
+//
+// void *worker_func(void *arg)
+// {
+//     (void)arg;
+//     return NULL;
+// }
 
 void
 update_bodies(struct quadtree *quadtree)
