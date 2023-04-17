@@ -3,6 +3,7 @@ project(
   'c',
   default_options : ['c_std=c99'],
 )
+# add_project_arguments('-g', language : 'c')
 add_project_arguments('-O3', language : 'c')
 sdl2_dependency = dependency('sdl2')
 sdl2_gfx_dependency = dependency('SDL2_gfx')

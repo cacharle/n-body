@@ -1,1 +1,5 @@
-sources = files('main.c')
+sources = files(
+  'main.c',
+  'body.c',
+  'quadtree.c',
+)
