@@ -24,8 +24,7 @@ body_gravitational_force(const struct body b1,
                          double           *force_x,
                          double           *force_y)
 {
-    if (fabs(b1.x - b2.x) < 0.03 ||
-        fabs(b1.y - b2.y) < 0.03)
+    if (fabs(b1.x - b2.x) < 0.03 || fabs(b1.y - b2.y) < 0.03)
     {
         *force_x = 0.0;
         *force_y = 0.0;

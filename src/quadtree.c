@@ -126,7 +126,7 @@ quadtree_update_mass(struct quadtree *quadtree)
     }
 }
 
-static const double approximate_distance_threshold = 0.0;
+static const double approximate_distance_threshold = 0.5;
 
 void
 quadtree_force(struct quadtree *quadtree, struct body body, double *force_x, double *force_y)
@@ -136,8 +136,7 @@ quadtree_force(struct quadtree *quadtree, struct body body, double *force_x, dou
     double distance_y = quadtree->center_of_mass_y - body.y;
     double distance = sqrt(distance_x * distance_x + distance_y * distance_y);
     double ratio = area_width / distance;
-    printf("here %f\n", ratio);
-    if (ratio > approximate_distance_threshold)
+    if (ratio < approximate_distance_threshold)
     {
         body_gravitational_force(body,
                                  (struct body){.x = quadtree->center_of_mass_x,
@@ -147,8 +146,8 @@ quadtree_force(struct quadtree *quadtree, struct body body, double *force_x, dou
                                  force_y);
         return;
     }
-    double nw_force_x, nw_force_y, ne_force_x, ne_force_y, sw_force_x, sw_force_y, se_force_x,
-        se_force_y;
+    double nw_force_x = 0.0, nw_force_y = 0.0, ne_force_x = 0.0, ne_force_y = 0.0, sw_force_x = 0.0,
+           sw_force_y = 0.0, se_force_x = 0.0, se_force_y = 0.0;
     switch (quadtree->type)
     {
     case QUADTREE_EMPTY: break;

@@ -23,7 +23,7 @@ static const uint32_t window_height = 1000;
 static SDL_Renderer  *renderer = NULL;
 static const char    *font_path = "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf";
 // bodies
-#define BODIES_COUNT 10
+#define BODIES_COUNT 8200
 static struct body bodies_previous[BODIES_COUNT] = {0};
 static struct body bodies[BODIES_COUNT] = {0};
 
@@ -67,7 +67,6 @@ update_bodies(struct quadtree *quadtree)
         // body_acceleration(&bodies[i]);
         double acceleration_x = 0.0, acceleration_y = 0.0;
         quadtree_force(quadtree, bodies[i], &acceleration_x, &acceleration_y);
-        // printf("%10f %10f\n", acceleration_x, acceleration_y);
         bodies[i].velocity_y -= acceleration_y;
         bodies[i].velocity_x -= acceleration_x;
         bodies[i].x += bodies[i].velocity_x;
@@ -78,18 +77,19 @@ update_bodies(struct quadtree *quadtree)
 void
 draw_bodies()
 {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 200);
     for (size_t i = 0; i < BODIES_COUNT; i++)
     {
         uint32_t canvas_x = bodies[i].x * (double)window_width;
         uint32_t canvas_y = bodies[i].y * (double)window_height;
-        uint32_t radius = 30 * bodies[i].mass;
-        // SDL_RenderDrawPoint(renderer, window_x, window_y);
-        aacircleRGBA(renderer, canvas_x, canvas_y, radius, 255, 255, 255, 255);
+        // uint32_t radius = 30 * bodies[i].mass;
+        SDL_RenderDrawPoint(renderer, canvas_x, canvas_y);
+        // aacircleRGBA(renderer, canvas_x, canvas_y, radius, 255, 255, 255, 255);
     }
 }
 
-void draw_quadtree(struct quadtree *quadtree, unsigned int depth)
+void
+draw_quadtree(struct quadtree *quadtree, unsigned int depth)
 {
     uint32_t canvas_start_x = quadtree->start_x * (double)window_width;
     uint32_t canvas_start_y = quadtree->start_y * (double)window_height;
@@ -115,7 +115,8 @@ void draw_quadtree(struct quadtree *quadtree, unsigned int depth)
     // }
     if (quadtree->type == QUADTREE_INTERNAL)
     {
-        filledCircleColor(renderer, canvas_center_of_mass_x, canvas_center_of_mass_y, 3, 0xff0000ff);
+        filledCircleColor(
+            renderer, canvas_center_of_mass_x, canvas_center_of_mass_y, 3, 0xff0000ff);
         draw_quadtree(quadtree->children.nw, depth + 1);
         draw_quadtree(quadtree->children.ne, depth + 1);
         draw_quadtree(quadtree->children.sw, depth + 1);
@@ -148,7 +149,7 @@ main()
     renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_ASSERT_NO_ERROR;
     TTF_Font *font = TTF_OpenFont(font_path, 16);
-    // SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
 
     struct timespec previous_time;
     clock_gettime(CLOCK_MONOTONIC, &previous_time);
@@ -189,7 +190,7 @@ main()
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        draw_quadtree(bodies_quadtree, 0);
+        // draw_quadtree(bodies_quadtree, 0);
         draw_bodies();
         quadtree_destroy(bodies_quadtree);
 
@@ -213,7 +214,7 @@ main()
         }
         memcpy(&previous_time, &current_time, sizeof previous_time);
         SDL_RenderPresent(renderer);
-        SDL_Delay(100);
+        // SDL_Delay(10);
     }
 
     SDL_DestroyRenderer(renderer);
