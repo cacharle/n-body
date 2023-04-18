@@ -23,7 +23,7 @@ static const uint32_t window_height = 1000;
 static SDL_Renderer  *renderer = NULL;
 static const char    *font_path = "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf";
 // bodies
-#define BODIES_COUNT 14000
+#define BODIES_COUNT 10
 static struct body bodies_previous[BODIES_COUNT] = {0};
 static struct body bodies[BODIES_COUNT] = {0};
 
@@ -67,6 +67,8 @@ body_acceleration(struct body *body)
 //     return NULL;
 // }
 
+static const double time_step = 0.001;
+
 void
 update_bodies(struct quadtree *quadtree)
 {
@@ -76,10 +78,12 @@ update_bodies(struct quadtree *quadtree)
         // body_acceleration(&bodies[i]);
         double acceleration_x = 0.0, acceleration_y = 0.0;
         quadtree_force(quadtree, &bodies[i], &acceleration_x, &acceleration_y);
-        bodies[i].velocity_y -= acceleration_y;
-        bodies[i].velocity_x -= acceleration_x;
-        bodies[i].x += bodies[i].velocity_x;
-        bodies[i].y += bodies[i].velocity_y;
+        acceleration_x /= bodies[i].mass;
+        acceleration_y /= bodies[i].mass;
+        bodies[i].velocity_y -= acceleration_y * time_step;
+        bodies[i].velocity_x -= acceleration_x * time_step;
+        bodies[i].x += bodies[i].velocity_x * time_step;
+        bodies[i].y += bodies[i].velocity_y * time_step;
     }
 }
 
@@ -91,9 +95,9 @@ draw_bodies()
     {
         uint32_t canvas_x = bodies[i].x * (double)window_width;
         uint32_t canvas_y = bodies[i].y * (double)window_height;
-        // uint32_t radius = 30 * bodies[i].mass;
-        SDL_RenderDrawPoint(renderer, canvas_x, canvas_y);
-        // aacircleRGBA(renderer, canvas_x, canvas_y, radius, 255, 255, 255, 255);
+        uint32_t radius = 30 * bodies[i].mass;
+        // SDL_RenderDrawPoint(renderer, canvas_x, canvas_y);
+        aacircleRGBA(renderer, canvas_x, canvas_y, radius, 255, 255, 255, 255);
     }
 }
 
@@ -223,7 +227,7 @@ main()
         }
         memcpy(&previous_time, &current_time, sizeof previous_time);
         SDL_RenderPresent(renderer);
-        // SDL_Delay(10);
+        SDL_Delay(10);
     }
 
     SDL_DestroyRenderer(renderer);
