@@ -4,8 +4,8 @@
 
 | Setup                 | bodies at 30 fps  | commit id |
 |-----------------------|-------------------|-----------|
-| Naive approche O(n^1) | 2250              | c14c76e   |
-| Quadtrees             | 14000             |           |
+| Naive approche O(n^2) | 2250              | c14c76e   |
+| Quadtrees             | 14000             | 62b55a2   |
 
 ## Resources
 

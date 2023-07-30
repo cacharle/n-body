@@ -7,16 +7,31 @@ frand()
 }
 
 void
-body_init_random(struct body *body)
+body_init_random_uniform(struct body *body)
 {
     body->x = frand();
     body->y = frand();
-    body->mass = frand() + 0.3;
-    body->velocity_x = (frand() - 0.5) / 1000;
-    body->velocity_y = (frand() - 0.5) / 1000;
+    // body->mass = frand() + 0.3;
+    body->mass = 0.1;
+    body->velocity_x = 0.0; //(frand() - 0.5) / 10000;
+    body->velocity_y = 0.0; //(frand() - 0.5) / 10000;
 }
 
-static const double gravity = 1.0;
+void
+body_init_random_in_unit_circle(struct body *body)
+{
+    do
+    {
+        body_init_random_uniform(body);
+        body->x = body->x * 2 - 1;
+        body->y = body->y * 2 - 1;
+    }
+    while (sqrt(body->x * body->x + body->y * body->y) > 0.5);
+    body->x += 0.5;
+    body->y += 0.5;
+}
+
+static const double gravity = 0.01;
 
 void
 body_gravitational_force(const struct body *b1,
@@ -31,7 +46,9 @@ body_gravitational_force(const struct body *b1,
     double distance_x = b1->x - b2->x;
     double distance_y = b1->y - b2->y;
     double distance_square = distance_x * distance_x + distance_y * distance_y;
-    double force = (b1->mass * b2->mass * gravity) / distance_square; // maybe we can remove the `b1->mass *` because we end up dividing by it at the end
+    double force = (b1->mass * b2->mass * gravity) /
+                   distance_square;  // maybe we can remove the `b1->mass *` because we end up
+                                     // dividing by it at the end
 
     double dx = b1->x - b2->x;
     double dy = b1->y - b2->y;
