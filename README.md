@@ -2,6 +2,16 @@
 
 ![demo.gif](./demo.gif)
 
+## Build
+
+Install [Meson](https://mesonbuild.com/Quick-guide.html).
+
+```
+$ meson setup build
+$ ninja -C build
+$ ./build/n-body
+```
+
 ## Benchmark
 
 | Setup                 | bodies at 30 fps  | commit id |
