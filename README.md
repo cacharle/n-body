@@ -1,11 +1,14 @@
 # n-body simulation
 
+![demo.gif](./demo.gif)
+
 ## Benchmark
 
 | Setup                 | bodies at 30 fps  | commit id |
 |-----------------------|-------------------|-----------|
 | Naive approche O(n^2) | 2250              | c14c76e   |
 | Quadtrees             | 14000             | 62b55a2   |
+| 16 workers            | 46000             | a2b40ee   |
 
 ## Resources
 

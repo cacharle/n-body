@@ -31,7 +31,7 @@ body_init_random_in_unit_circle(struct body *body)
     body->y += 0.5;
 }
 
-static const double gravity = 0.01;
+static const double gravity = 0.0005;
 
 void
 body_gravitational_force(const struct body *b1,
