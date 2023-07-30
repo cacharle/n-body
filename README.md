@@ -12,6 +12,24 @@ $ ninja -C build
 $ ./build/n-body
 ```
 
+## Usage
+
+```
+$ ./n-body -h
+Usage: n-body
+	-h Print this message
+	-b Number of body (default: 1000)
+	-w Number of workers (default: 1)
+	-m Assign a random mass to bodies and draw that mass
+		(all bodies have the same mass by default)
+	-i Body initialization method (default: circle)
+		Available: uniform, circle
+	-g Gravity (default: 0.000500)
+UI Controls:
+	Escape/Q: Quit
+	Space:    Pause
+```
+
 ## Benchmark
 
 | Setup                 | bodies at 30 fps  | commit id |

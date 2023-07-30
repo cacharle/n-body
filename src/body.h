@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include "utils.h"
 
 struct body
 {
@@ -20,6 +21,7 @@ body_init_random_in_unit_circle(struct body *body);
 void
 body_gravitational_force(const struct body *b1,
                          const struct body *b2,
+                         const double gravity,
                          double            *force_x,
                          double            *force_y);
 

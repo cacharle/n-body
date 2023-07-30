@@ -48,6 +48,7 @@ quadtree_update_mass(struct quadtree *quadtree);
 void
 quadtree_force(const struct quadtree *quadtree,
                const struct body     *body,
+               const double gravity,
                double                *force_x,
                double                *force_y);
 

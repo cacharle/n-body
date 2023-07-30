@@ -1,11 +1,5 @@
 #include "body.h"
 
-static double
-frand()
-{
-    return (double)rand() / (double)RAND_MAX;
-}
-
 void
 body_init_random_uniform(struct body *body)
 {
@@ -13,8 +7,8 @@ body_init_random_uniform(struct body *body)
     body->y = frand();
     // body->mass = frand() + 0.3;
     body->mass = 0.1;
-    body->velocity_x = 0.0; //(frand() - 0.5) / 10000;
-    body->velocity_y = 0.0; //(frand() - 0.5) / 10000;
+    body->velocity_x = 0.0;  // (frand() - 0.5) / 10000;
+    body->velocity_y = 0.0;  // (frand() - 0.5) / 10000;
 }
 
 void
@@ -25,17 +19,17 @@ body_init_random_in_unit_circle(struct body *body)
         body_init_random_uniform(body);
         body->x = body->x * 2 - 1;
         body->y = body->y * 2 - 1;
-    }
-    while (sqrt(body->x * body->x + body->y * body->y) > 0.5);
+    } while (sqrt(body->x * body->x + body->y * body->y) > 0.5);
     body->x += 0.5;
     body->y += 0.5;
 }
 
-static const double gravity = 0.0005;
+// static const double gravity = 0.0005;
 
 void
 body_gravitational_force(const struct body *b1,
                          const struct body *b2,
+                         const double gravity,
                          double            *force_x,
                          double            *force_y)
 {

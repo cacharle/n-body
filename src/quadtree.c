@@ -131,6 +131,7 @@ static const double approximate_distance_threshold = 0.5;
 void
 quadtree_force(const struct quadtree *quadtree,
                const struct body     *body,
+               const double gravity,
                double                *force_x,
                double                *force_y)
 {
@@ -138,7 +139,7 @@ quadtree_force(const struct quadtree *quadtree,
         return;
     if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a body
     {
-        body_gravitational_force(body, &quadtree->body, force_x, force_y);
+        body_gravitational_force(body, &quadtree->body, gravity, force_x, force_y);
         return;
     }
     // Check if we can approximate internal node
@@ -153,6 +154,7 @@ quadtree_force(const struct quadtree *quadtree,
                                  &(struct body){.x = quadtree->center_of_mass_x,
                                                 .y = quadtree->center_of_mass_y,
                                                 .mass = quadtree->total_mass},
+                                                gravity,
                                  force_x,
                                  force_y);
         return;
@@ -160,10 +162,10 @@ quadtree_force(const struct quadtree *quadtree,
     // Compute force for all region
     double nw_force_x = 0.0, nw_force_y = 0.0, ne_force_x = 0.0, ne_force_y = 0.0, sw_force_x = 0.0,
            sw_force_y = 0.0, se_force_x = 0.0, se_force_y = 0.0;
-    quadtree_force(quadtree->children.nw, body, &nw_force_x, &nw_force_y);
-    quadtree_force(quadtree->children.ne, body, &ne_force_x, &ne_force_y);
-    quadtree_force(quadtree->children.sw, body, &sw_force_x, &sw_force_y);
-    quadtree_force(quadtree->children.se, body, &se_force_x, &se_force_y);
+    quadtree_force(quadtree->children.nw, body, gravity, &nw_force_x, &nw_force_y);
+    quadtree_force(quadtree->children.ne, body, gravity, &ne_force_x, &ne_force_y);
+    quadtree_force(quadtree->children.sw, body, gravity, &sw_force_x, &sw_force_y);
+    quadtree_force(quadtree->children.se, body, gravity, &se_force_x, &se_force_y);
     *force_x = nw_force_x + ne_force_x + sw_force_x + se_force_x;
     *force_y = nw_force_y + ne_force_y + sw_force_y + se_force_y;
 }
