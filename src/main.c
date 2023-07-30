@@ -25,7 +25,7 @@ static const uint32_t window_height = 1000;
 static SDL_Renderer  *renderer = NULL;
 static const char    *font_path = "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf";
 // bodies
-#define BODIES_COUNT 100000
+#define BODIES_COUNT 46000
 static struct body bodies_previous[BODIES_COUNT] = {0};
 static struct body bodies[BODIES_COUNT] = {0};
 
@@ -62,7 +62,7 @@ body_acceleration(struct body *body)
     body->velocity_x += acceleration_x_;
 }
 
-#define THREAD_POOL_COUNT 4
+#define THREAD_POOL_COUNT 16
 pthread_t thread_pool[THREAD_POOL_COUNT];
 #define BODIES_COUNT_PER_THREAD (BODIES_COUNT / THREAD_POOL_COUNT)
 
@@ -191,7 +191,7 @@ main()
     SDL_Window *window = SDL_CreateWindow(
         "n-body", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, 0);
     SDL_ASSERT_NO_ERROR;
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_ASSERT_NO_ERROR;
     TTF_Font *font = TTF_OpenFont(font_path, 16);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
