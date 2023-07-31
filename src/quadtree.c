@@ -157,7 +157,7 @@ quadtree_force(const struct quadtree *quadtree,
 {
     if (quadtree->type == QUADTREE_EMPTY)
         return;
-    if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a body
+    if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a group bodies
     {
         body_gravitational_force_avx2(body, quadtree->external.bodies, gravity, force_x, force_y);
         return;
@@ -188,4 +188,26 @@ quadtree_force(const struct quadtree *quadtree,
     quadtree_force(quadtree->internal.se, body, gravity, &se_force_x, &se_force_y);
     *force_x = nw_force_x + ne_force_x + sw_force_x + se_force_x;
     *force_y = nw_force_y + ne_force_y + sw_force_y + se_force_y;
+}
+
+void
+quadtree_stats(const struct quadtree *quadtree, struct quadtree_stats *stats)
+{
+    stats->node_count++;
+    switch (quadtree->type)
+    {
+        case QUADTREE_EMPTY:
+            stats->empty_count++;
+            break;
+        case QUADTREE_EXTERNAL:
+            stats->external_count++;
+            break;
+        case QUADTREE_INTERNAL:
+            stats->internal_count++;
+            quadtree_stats(quadtree->internal.nw, stats);
+            quadtree_stats(quadtree->internal.ne, stats);
+            quadtree_stats(quadtree->internal.sw, stats);
+            quadtree_stats(quadtree->internal.se, stats);
+            break;
+    }
 }

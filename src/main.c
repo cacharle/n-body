@@ -23,6 +23,7 @@ static struct worker_arg *threads_args = NULL;
 static bool               flag_mass = false;
 static void (*flag_bodies_initialization_function)(struct body *) = body_init_random_circle;
 static float gravity = 0.0005f;
+static bool flag_debug = false;
 
 struct worker_arg
 {
@@ -52,8 +53,9 @@ worker_func(struct worker_arg *arg)
 int
 main(int argc, char **argv)
 {
+    threads_count = sysconf(_SC_NPROCESSORS_ONLN);
     int option;
-    while ((option = getopt(argc, argv, "hb:w:mi:g:")) != -1)
+    while ((option = getopt(argc, argv, "hb:w:mi:g:d")) != -1)
     {
         switch (option)
         {
@@ -61,17 +63,17 @@ main(int argc, char **argv)
             printf("Usage: n-body\n"
                    "\t-h Print this message\n"
                    "\t-b Number of body (default: %zu)\n"
-                   "\t-w Number of workers (default: %zu)\n"
+                   "\t-w Number of workers (default: number of cpu cores)\n"
                    "\t-m Assign a random mass to bodies and draw that mass\n"
                    "\t\t(all bodies have the same mass by default)\n"
                    "\t-i Body initialization method (default: circle)\n"
                    "\t\tAvailable: uniform, circle\n"
                    "\t-g Gravity (default: %f)\n"
+                   "\t-d Enable debug mode\n"
                    "UI Controls:\n"
                    "\tEscape/Q: Quit\n"
                    "\tSpace:    Pause\n",
                    bodies_count,
-                   threads_count,
                    gravity);
             exit(EXIT_SUCCESS);
             break;
@@ -103,6 +105,9 @@ main(int argc, char **argv)
             gravity = strtod(optarg, NULL);
             if (errno != 0)
                 die("Invalid argument to -w: %s", optarg);
+            break;
+        case 'd':
+            flag_debug = true;
             break;
         }
     }
@@ -150,6 +155,23 @@ main(int argc, char **argv)
         for (size_t i = 0; i < bodies_count; i++)
             quadtree_insert(bodies_quadtree, bodies[i]);
         quadtree_update_mass(bodies_quadtree);
+        if (flag_debug)
+        {
+            struct quadtree_stats stats = {0};
+            quadtree_stats(bodies_quadtree, &stats);
+            printf(
+                "stats:\n"
+                "\tnode count:     %5zu\n"
+                "\tempty count:    %5zu\n"
+                "\texternal count: %5zu, average bodies in external %5.1f\n"
+                "\tInternal count: %5zu\n",
+                stats.node_count,
+                stats.empty_count,
+                stats.external_count,
+                (double)bodies_count / (double)stats.external_count,
+                stats.internal_count
+            );
+        }
         // Create threads to compute the gravitational forces
         size_t stride = bodies_count / threads_count;
         for (size_t i = 0, start_index = 0; i < threads_count; i++, start_index += stride)
@@ -163,8 +185,8 @@ main(int argc, char **argv)
         }
         for (size_t i = 0; i < threads_count; i++)
             pthread_join(threads[i], NULL);
+        draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
         quadtree_destroy(bodies_quadtree);
-        draw_update(bodies, bodies_count, flag_mass);
         // SDL_Delay(100);
     }
     draw_quit();

@@ -43,6 +43,13 @@ struct quadtree
     };
 };
 
+struct quadtree_stats {
+    size_t node_count;
+    size_t empty_count;
+    size_t external_count;
+    size_t internal_count;
+};
+
 struct quadtree *
 quadtree_new(void);
 void
@@ -57,5 +64,7 @@ quadtree_force(const struct quadtree *quadtree,
                const float            gravity,
                float                 *force_x,
                float                 *force_y);
+void
+quadtree_stats(const struct quadtree *quadtree, struct quadtree_stats *stats);
 
 #endif

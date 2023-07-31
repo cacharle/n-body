@@ -27,6 +27,8 @@ static struct timespec previous_time;
 
 static void
 draw_bodies(struct body *bodies, size_t bodies_count, bool mass);
+static void
+draw_quadtree(struct quadtree *quadtree, unsigned int depth);
 
 void
 draw_init()
@@ -82,11 +84,12 @@ draw_handle_events(bool *running, bool *paused)
 }
 
 void
-draw_update(struct body *bodies, size_t bodies_count, bool mass)
+draw_update(struct body *bodies, size_t bodies_count, bool mass, struct quadtree *quadtree)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    // draw_quadtree(bodies_quadtree, 0);
+    if (quadtree != NULL)
+        draw_quadtree(quadtree, 0);
     draw_bodies(bodies, bodies_count, mass);
 
     // Compute FPS and display it
@@ -142,40 +145,21 @@ draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
         SDL_RenderDrawPoints(renderer, bodies_points, points_i);
 }
 
-// void
-// draw_quadtree(struct quadtree *quadtree, unsigned int depth)
-// {
-//     // if (depth > 8)
-//     //     return;
-//     uint32_t canvas_start_x = quadtree->start_x * (float)window_width;
-//     uint32_t canvas_start_y = quadtree->start_y * (float)window_height;
-//     uint32_t canvas_end_x = quadtree->end_x * (float)window_width;
-//     uint32_t canvas_end_y = quadtree->end_y * (float)window_height;
-//     // uint32_t canvas_center_of_mass_x = quadtree->center_of_mass_x * (float)window_width;
-//     // uint32_t canvas_center_of_mass_y = quadtree->center_of_mass_y * (float)window_height;
-//     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
-//     SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_end_x, canvas_start_y);
-//     SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_start_x, canvas_end_y);
-//     // if (quadtree->type == QUADTREE_EMPTY)
-//     // {
-//     //     SDL_SetRenderDrawColor(renderer, 20, 20, 20, 0);
-//     //     SDL_RenderFillRect(
-//     //         renderer,
-//     //         &(SDL_Rect){
-//     //             .x = canvas_start_x + 1,
-//     //             .y = canvas_start_y + 1,
-//     //             .w = canvas_end_x - canvas_start_x - 1,
-//     //             .h = canvas_end_y - canvas_start_y - 1
-//     //         }
-//     //     );
-//     // }
-//     if (quadtree->type == QUADTREE_INTERNAL)
-//     {
-//         // filledCircleColor(
-//         //     renderer, canvas_center_of_mass_x, canvas_center_of_mass_y, 3, 0xff0000ff);
-//         draw_quadtree(quadtree->children.nw, depth + 1);
-//         draw_quadtree(quadtree->children.ne, depth + 1);
-//         draw_quadtree(quadtree->children.sw, depth + 1);
-//         draw_quadtree(quadtree->children.se, depth + 1);
-//     }
-// }
+static void
+draw_quadtree(struct quadtree *quadtree, unsigned int depth)
+{
+    uint32_t canvas_start_x = quadtree->start_x * (float)window_width;
+    uint32_t canvas_start_y = quadtree->start_y * (float)window_height;
+    uint32_t canvas_end_x = quadtree->end_x * (float)window_width;
+    uint32_t canvas_end_y = quadtree->end_y * (float)window_height;
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
+    SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_end_x, canvas_start_y);
+    SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_start_x, canvas_end_y);
+    if (quadtree->type == QUADTREE_INTERNAL)
+    {
+        draw_quadtree(quadtree->internal.nw, depth + 1);
+        draw_quadtree(quadtree->internal.ne, depth + 1);
+        draw_quadtree(quadtree->internal.sw, depth + 1);
+        draw_quadtree(quadtree->internal.se, depth + 1);
+    }
+}
