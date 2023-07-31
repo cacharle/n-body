@@ -35,8 +35,18 @@ UI Controls:
 | Setup                 | bodies at 30 fps  | commit id |
 |-----------------------|-------------------|-----------|
 | Naive approche O(n^2) | 2250              | c14c76e   |
-| Quadtrees             | 14000             | 62b55a2   |
+| Quadtrees O(n log n)  | 14000             | 62b55a2   |
 | 16 workers            | 46000             | a2b40ee   |
+
+### Optimization ideas
+
+- [x] quadtree
+- [x] multithreading
+- [ ] quadtree with external node containing 4 bodies and computing 4 force at a time with AVX2
+- [ ] store quadtrees in a dynamic array and reuse that array when rebuilding the quadtree (would save a lot of malloc time)
+- [ ] compute the force between 2 bodies and **apply** that force to **2** bodies (we compute the force twice now)
+- [ ] Naive approch on GPU
+- [ ] quadtree on GPU (possible by putting the quadtree's node in an array)
 
 ## Resources
 

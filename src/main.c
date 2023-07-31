@@ -16,7 +16,7 @@
 // #define BODIES_COUNT 50000
 static size_t             bodies_count = 1000;
 static struct body       *bodies = NULL;
-static const float       time_step = 0.001f;
+static const float        time_step = 0.001f;
 static size_t             threads_count = 1;
 static pthread_t         *threads = NULL;
 static struct worker_arg *threads_args = NULL;

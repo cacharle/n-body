@@ -83,7 +83,7 @@ quadtree_insert(struct quadtree *quadtree, struct body body)
         // reinsert the original bodies
         for (size_t i = 0; i < QUADTREE_MAX_BODIES_COUNT; i++)
             quadtree_insert(quadtree, original_bodies[i]);
-        quadtree_insert(quadtree, body);           // treated as an internal node now
+        quadtree_insert(quadtree, body);  // treated as an internal node now
         break;
     case QUADTREE_INTERNAL:
         if (in_boundary(quadtree->internal.nw, body))
@@ -112,8 +112,10 @@ quadtree_update_mass(struct quadtree *quadtree)
         for (size_t i = 0; i < quadtree->external.bodies_count; i++)
         {
             quadtree->total_mass += quadtree->external.bodies[i].mass;
-            quadtree->center_of_mass_x += quadtree->external.bodies[i].x * quadtree->external.bodies[i].mass;
-            quadtree->center_of_mass_y += quadtree->external.bodies[i].y * quadtree->external.bodies[i].mass;
+            quadtree->center_of_mass_x +=
+                quadtree->external.bodies[i].x * quadtree->external.bodies[i].mass;
+            quadtree->center_of_mass_y +=
+                quadtree->external.bodies[i].y * quadtree->external.bodies[i].mass;
         }
         quadtree->center_of_mass_x /= quadtree->total_mass;
         quadtree->center_of_mass_y /= quadtree->total_mass;
@@ -149,9 +151,9 @@ static const float approximate_distance_threshold = 0.5;
 void
 quadtree_force(const struct quadtree *quadtree,
                const struct body     *body,
-               const float gravity,
-               float                *force_x,
-               float                *force_y)
+               const float            gravity,
+               float                 *force_x,
+               float                 *force_y)
 {
     if (quadtree->type == QUADTREE_EMPTY)
         return;
@@ -173,7 +175,7 @@ quadtree_force(const struct quadtree *quadtree,
     float area_width = fabsf(quadtree->end_x - quadtree->start_x);
     float distance_x = quadtree->center_of_mass_x - body->x;
     float distance_y = quadtree->center_of_mass_y - body->y;
-    float inverse_distance = rsqrt(distance_x * distance_x + distance_y * distance_y);
+    float inverse_distance = 1.0f / sqrtf(distance_x * distance_x + distance_y * distance_y);
     // float distance = sqrt(distance_x * distance_x + distance_y * distance_y);
     float ratio = area_width * inverse_distance;
     // float ratio = area_width / distance;
@@ -183,14 +185,14 @@ quadtree_force(const struct quadtree *quadtree,
                                  &(struct body){.x = quadtree->center_of_mass_x,
                                                 .y = quadtree->center_of_mass_y,
                                                 .mass = quadtree->total_mass},
-                                                gravity,
+                                 gravity,
                                  force_x,
                                  force_y);
         return;
     }
     // Compute force for all region
     float nw_force_x = 0.0, nw_force_y = 0.0, ne_force_x = 0.0, ne_force_y = 0.0, sw_force_x = 0.0,
-           sw_force_y = 0.0, se_force_x = 0.0, se_force_y = 0.0;
+          sw_force_y = 0.0, se_force_x = 0.0, se_force_y = 0.0;
     quadtree_force(quadtree->internal.nw, body, gravity, &nw_force_x, &nw_force_y);
     quadtree_force(quadtree->internal.ne, body, gravity, &ne_force_x, &ne_force_y);
     quadtree_force(quadtree->internal.sw, body, gravity, &sw_force_x, &sw_force_y);

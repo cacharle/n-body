@@ -19,19 +19,19 @@ enum quadtree_type
 struct quadtree
 {
     enum quadtree_type type;
-    float             total_mass;
-    float             center_of_mass_x;
-    float             center_of_mass_y;
-    float             start_x;
-    float             start_y;
-    float             end_x;
-    float             end_y;
+    float              total_mass;
+    float              center_of_mass_x;
+    float              center_of_mass_y;
+    float              start_x;
+    float              start_y;
+    float              end_x;
+    float              end_y;
     union
     {
         struct
         {
             struct body bodies[QUADTREE_MAX_BODIES_COUNT];
-            size_t bodies_count;
+            size_t      bodies_count;
         } external;
         struct
         {
@@ -54,8 +54,8 @@ quadtree_update_mass(struct quadtree *quadtree);
 void
 quadtree_force(const struct quadtree *quadtree,
                const struct body     *body,
-               const float gravity,
-               float                *force_x,
-               float                *force_y);
+               const float            gravity,
+               float                 *force_x,
+               float                 *force_y);
 
 #endif
