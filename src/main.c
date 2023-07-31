@@ -50,6 +50,8 @@ worker_func(struct worker_arg *arg)
     return NULL;
 }
 
+extern void kernel_function();
+
 int
 main(int argc, char **argv)
 {
