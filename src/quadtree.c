@@ -160,15 +160,6 @@ quadtree_force(const struct quadtree *quadtree,
     if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a body
     {
         body_gravitational_force_avx2(body, quadtree->external.bodies, gravity, force_x, force_y);
-        // *force_x = 0.0;
-        // *force_y = 0.0;
-        // for (size_t i = 0; i < quadtree->external.bodies_count; i++)
-        // {
-        //     float fx = 0.0, fy = 0.0;
-        //     body_gravitational_force(body, &quadtree->external.bodies[i], gravity, &fx, &fy);
-        //     *force_x += fx;
-        //     *force_y += fy;
-        // }
         return;
     }
     // Check if we can approximate internal node

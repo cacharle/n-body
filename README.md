@@ -37,7 +37,8 @@ UI Controls:
 | Naive approche O(n^2)                                     | 2250              | c14c76e   |
 | Quadtrees O(n log n)                                      | 14000             | 62b55a2   |
 | 16 workers                                                | 46000             | a2b40ee   |
-| External nodes of the quadtree containing multiple bodies | 65000             | ad5ed61   |
+| External nodes of the quadtree containing multiple bodies | 55000             | ad5ed61   |
+| AVX2 on external nodes groups                             | 65000             |    |
 
 ### Optimization ideas
 

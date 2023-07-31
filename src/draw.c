@@ -7,7 +7,11 @@ static SDL_Window    *window = NULL;
 static SDL_Renderer  *renderer = NULL;
 static TTF_Font      *font = NULL;
 static const char    *font_paths[] = {"/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf",
-                                      "/System/Library/Fonts/SFNSMono.ttf"};
+                                      "/System/"
+                                         "Library/"
+                                         "Fonts/"
+                                         "SFNSMono."
+                                         "ttf"};
 
 #define SDL_ASSERT_NO_ERROR                                                           \
     do                                                                                \
