@@ -10,6 +10,7 @@ project(
 # add_project_arguments('-pg', language : 'c')
 # add_project_arguments('-g', language : 'c')
 add_project_arguments('-O3', language : 'c')
+add_project_arguments('-mavx2', language : 'c')
 sdl2_dependency = dependency('sdl2')
 sdl2_gfx_dependency = dependency('SDL2_gfx')
 sdl2_ttf_dependency = dependency('SDL2_ttf')

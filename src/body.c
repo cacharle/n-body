@@ -46,9 +46,9 @@ body_gravitational_force(const struct body *b1,
 
     double dx = b1->x - b2->x;
     double dy = b1->y - b2->y;
-    double magnitude = sqrt(dx * dx + dy * dy);
-    dx /= magnitude;
-    dy /= magnitude;
+    double magnitude_inverse = (double)rsqrt((float)(dx * dx + dy * dy));
+    dx *= magnitude_inverse;
+    dy *= magnitude_inverse;
     dx *= force;
     dy *= force;
     if (!isnan(dx) && !isnan(dy))

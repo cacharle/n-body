@@ -15,6 +15,8 @@ void *
 xmalloc(size_t size);
 double
 frand();
+float
+rsqrt(float number);
 
 
 #endif

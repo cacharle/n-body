@@ -99,6 +99,8 @@ quadtree_insert(struct quadtree *quadtree, struct body body)
     }
 }
 
+#include <immintrin.h>
+
 void
 quadtree_update_mass(struct quadtree *quadtree)
 {
@@ -172,8 +174,10 @@ quadtree_force(const struct quadtree *quadtree,
     double area_width = fabs(quadtree->end_x - quadtree->start_x);
     double distance_x = quadtree->center_of_mass_x - body->x;
     double distance_y = quadtree->center_of_mass_y - body->y;
-    double distance = sqrt(distance_x * distance_x + distance_y * distance_y);
-    double ratio = area_width / distance;
+    float inverse_distance = rsqrt((float)(distance_x * distance_x + distance_y * distance_y));
+    // double distance = sqrt(distance_x * distance_x + distance_y * distance_y);
+    double ratio = area_width * (double)inverse_distance;
+    // double ratio = area_width / distance;
     if (ratio < approximate_distance_threshold)
     {
         body_gravitational_force(body,
