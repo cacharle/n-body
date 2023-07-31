@@ -58,8 +58,8 @@ quadtree_insert(struct quadtree *quadtree, struct body body)
         quadtree->internal.ne = quadtree_new();
         quadtree->internal.sw = quadtree_new();
         quadtree->internal.se = quadtree_new();
-        double mid_x = quadtree->start_x + (quadtree->end_x - quadtree->start_x) / 2.0;
-        double mid_y = quadtree->start_y + (quadtree->end_y - quadtree->start_y) / 2.0;
+        float mid_x = quadtree->start_x + (quadtree->end_x - quadtree->start_x) / 2.0f;
+        float mid_y = quadtree->start_y + (quadtree->end_y - quadtree->start_y) / 2.0f;
         // nw
         quadtree->internal.nw->start_x = quadtree->start_x;
         quadtree->internal.nw->end_x = mid_x;
@@ -98,8 +98,6 @@ quadtree_insert(struct quadtree *quadtree, struct body body)
         break;
     }
 }
-
-#include <immintrin.h>
 
 void
 quadtree_update_mass(struct quadtree *quadtree)
@@ -146,38 +144,39 @@ quadtree_update_mass(struct quadtree *quadtree)
     }
 }
 
-static const double approximate_distance_threshold = 0.5;
+static const float approximate_distance_threshold = 0.5;
 
 void
 quadtree_force(const struct quadtree *quadtree,
                const struct body     *body,
-               const double gravity,
-               double                *force_x,
-               double                *force_y)
+               const float gravity,
+               float                *force_x,
+               float                *force_y)
 {
     if (quadtree->type == QUADTREE_EMPTY)
         return;
     if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a body
     {
-        *force_x = 0.0;
-        *force_y = 0.0;
-        for (size_t i = 0; i < quadtree->external.bodies_count; i++)
-        {
-            double fx = 0.0, fy = 0.0;
-            body_gravitational_force(body, &quadtree->external.bodies[i], gravity, &fx, &fy);
-            *force_x += fx;
-            *force_y += fy;
-        }
+        body_gravitational_force_avx2(body, quadtree->external.bodies, gravity, force_x, force_y);
+        // *force_x = 0.0;
+        // *force_y = 0.0;
+        // for (size_t i = 0; i < quadtree->external.bodies_count; i++)
+        // {
+        //     float fx = 0.0, fy = 0.0;
+        //     body_gravitational_force(body, &quadtree->external.bodies[i], gravity, &fx, &fy);
+        //     *force_x += fx;
+        //     *force_y += fy;
+        // }
         return;
     }
     // Check if we can approximate internal node
-    double area_width = fabs(quadtree->end_x - quadtree->start_x);
-    double distance_x = quadtree->center_of_mass_x - body->x;
-    double distance_y = quadtree->center_of_mass_y - body->y;
-    float inverse_distance = rsqrt((float)(distance_x * distance_x + distance_y * distance_y));
-    // double distance = sqrt(distance_x * distance_x + distance_y * distance_y);
-    double ratio = area_width * (double)inverse_distance;
-    // double ratio = area_width / distance;
+    float area_width = fabsf(quadtree->end_x - quadtree->start_x);
+    float distance_x = quadtree->center_of_mass_x - body->x;
+    float distance_y = quadtree->center_of_mass_y - body->y;
+    float inverse_distance = rsqrt(distance_x * distance_x + distance_y * distance_y);
+    // float distance = sqrt(distance_x * distance_x + distance_y * distance_y);
+    float ratio = area_width * inverse_distance;
+    // float ratio = area_width / distance;
     if (ratio < approximate_distance_threshold)
     {
         body_gravitational_force(body,
@@ -190,7 +189,7 @@ quadtree_force(const struct quadtree *quadtree,
         return;
     }
     // Compute force for all region
-    double nw_force_x = 0.0, nw_force_y = 0.0, ne_force_x = 0.0, ne_force_y = 0.0, sw_force_x = 0.0,
+    float nw_force_x = 0.0, nw_force_y = 0.0, ne_force_x = 0.0, ne_force_y = 0.0, sw_force_x = 0.0,
            sw_force_y = 0.0, se_force_x = 0.0, se_force_y = 0.0;
     quadtree_force(quadtree->internal.nw, body, gravity, &nw_force_x, &nw_force_y);
     quadtree_force(quadtree->internal.ne, body, gravity, &ne_force_x, &ne_force_y);

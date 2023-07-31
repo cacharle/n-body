@@ -120,8 +120,8 @@ draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
     size_t points_i = 0;
     for (size_t i = 0; i < bodies_count; i++)
     {
-        uint32_t canvas_x = bodies[i].x * (double)window_width;
-        uint32_t canvas_y = bodies[i].y * (double)window_height;
+        uint32_t canvas_x = bodies[i].x * (float)window_width;
+        uint32_t canvas_y = bodies[i].y * (float)window_height;
         if (!mass)
         {
             if (canvas_x < 0 || canvas_x > window_width || canvas_y < 0 || canvas_y > window_height)
@@ -145,12 +145,12 @@ draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
 // {
 //     // if (depth > 8)
 //     //     return;
-//     uint32_t canvas_start_x = quadtree->start_x * (double)window_width;
-//     uint32_t canvas_start_y = quadtree->start_y * (double)window_height;
-//     uint32_t canvas_end_x = quadtree->end_x * (double)window_width;
-//     uint32_t canvas_end_y = quadtree->end_y * (double)window_height;
-//     // uint32_t canvas_center_of_mass_x = quadtree->center_of_mass_x * (double)window_width;
-//     // uint32_t canvas_center_of_mass_y = quadtree->center_of_mass_y * (double)window_height;
+//     uint32_t canvas_start_x = quadtree->start_x * (float)window_width;
+//     uint32_t canvas_start_y = quadtree->start_y * (float)window_height;
+//     uint32_t canvas_end_x = quadtree->end_x * (float)window_width;
+//     uint32_t canvas_end_y = quadtree->end_y * (float)window_height;
+//     // uint32_t canvas_center_of_mass_x = quadtree->center_of_mass_x * (float)window_width;
+//     // uint32_t canvas_center_of_mass_y = quadtree->center_of_mass_y * (float)window_height;
 //     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
 //     SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_end_x, canvas_start_y);
 //     SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_start_x, canvas_end_y);

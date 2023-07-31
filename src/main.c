@@ -16,13 +16,13 @@
 // #define BODIES_COUNT 50000
 static size_t             bodies_count = 1000;
 static struct body       *bodies = NULL;
-static const double       time_step = 0.001;
+static const float       time_step = 0.001f;
 static size_t             threads_count = 1;
 static pthread_t         *threads = NULL;
 static struct worker_arg *threads_args = NULL;
 static bool               flag_mass = false;
 static void (*flag_bodies_initialization_function)(struct body *) = body_init_random_in_unit_circle;
-static double gravity = 0.0005;
+static float gravity = 0.0005f;
 
 struct worker_arg
 {
@@ -37,7 +37,7 @@ worker_func(struct worker_arg *arg)
     for (size_t i = arg->start_index; i < arg->stop_index; i++)
     {
         // body_acceleration(&bodies[i]);
-        double acceleration_x = 0.0, acceleration_y = 0.0;
+        float acceleration_x = 0.0, acceleration_y = 0.0;
         quadtree_force(arg->quadtree, &bodies[i], gravity, &acceleration_x, &acceleration_y);
         acceleration_x /= bodies[i].mass;
         acceleration_y /= bodies[i].mass;

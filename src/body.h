@@ -7,11 +7,11 @@
 
 struct body
 {
-    double mass;
-    double x;
-    double y;
-    double velocity_x;
-    double velocity_y;
+    float mass;
+    float x;
+    float y;
+    float velocity_x;
+    float velocity_y;
 };
 
 void
@@ -21,8 +21,14 @@ body_init_random_in_unit_circle(struct body *body);
 void
 body_gravitational_force(const struct body *b1,
                          const struct body *b2,
-                         const double gravity,
-                         double            *force_x,
-                         double            *force_y);
+                         const float gravity,
+                         float            *force_x,
+                         float            *force_y);
+void
+body_gravitational_force_avx2(const struct body *dest_body,
+                              const struct body bodies[4],
+                              const float gravity,
+                              float            *force_x,
+                              float            *force_y);
 
 #endif

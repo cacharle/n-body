@@ -13,7 +13,7 @@ void
 die(char *format, ...);
 void *
 xmalloc(size_t size);
-double
+float
 frand();
 float
 rsqrt(float number);
