@@ -14,6 +14,8 @@ enum quadtree_type
     QUADTREE_INTERNAL = 2,
 };
 
+#define QUADTREE_MAX_BODIES_COUNT 4
+
 struct quadtree
 {
     enum quadtree_type type;
@@ -26,14 +28,18 @@ struct quadtree
     double             end_y;
     union
     {
-        struct body body;
+        struct
+        {
+            struct body bodies[QUADTREE_MAX_BODIES_COUNT];
+            size_t bodies_count;
+        } external;
         struct
         {
             struct quadtree *nw;
             struct quadtree *ne;
             struct quadtree *sw;
             struct quadtree *se;
-        } children;
+        } internal;
     };
 };
 

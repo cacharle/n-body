@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
+
 void
 die(char *format, ...);
 void *

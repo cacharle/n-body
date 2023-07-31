@@ -6,7 +6,10 @@ static const uint32_t window_height = 1000;
 static SDL_Window    *window = NULL;
 static SDL_Renderer  *renderer = NULL;
 static TTF_Font      *font = NULL;
-static const char    *font_path = "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf";
+static const char    *font_paths[] = {
+    "/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf",
+    "/System/Library/Fonts/SFNSMono.ttf"
+};
 
 #define SDL_ASSERT_NO_ERROR                                                           \
     do                                                                                \
@@ -34,7 +37,14 @@ draw_init()
     SDL_ASSERT_NO_ERROR;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_ASSERT_NO_ERROR;
-    font = TTF_OpenFont(font_path, 16);
+    for (size_t i = 0; i < ARRAY_LEN(font_paths); i++)
+    {
+        font = TTF_OpenFont(font_paths[i], 16);
+        if (font != NULL)
+            break;
+    }
+    if (font == NULL)
+        die("Cannot open font");
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
     clock_gettime(CLOCK_MONOTONIC, &previous_time);
 }

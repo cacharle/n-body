@@ -23,10 +23,10 @@ quadtree_destroy(struct quadtree *quadtree)
 {
     if (quadtree->type == QUADTREE_INTERNAL)
     {
-        quadtree_destroy(quadtree->children.nw);
-        quadtree_destroy(quadtree->children.ne);
-        quadtree_destroy(quadtree->children.sw);
-        quadtree_destroy(quadtree->children.se);
+        quadtree_destroy(quadtree->internal.nw);
+        quadtree_destroy(quadtree->internal.ne);
+        quadtree_destroy(quadtree->internal.sw);
+        quadtree_destroy(quadtree->internal.se);
     }
     free(quadtree);
 }
@@ -41,49 +41,59 @@ quadtree_insert(struct quadtree *quadtree, struct body body)
     {
     case QUADTREE_EMPTY:
         quadtree->type = QUADTREE_EXTERNAL;
-        quadtree->body = body;
+        quadtree->external.bodies[0] = body;
+        quadtree->external.bodies_count = 1;
         break;
     case QUADTREE_EXTERNAL:
+        if (quadtree->external.bodies_count < QUADTREE_MAX_BODIES_COUNT)
+        {
+            quadtree->external.bodies[quadtree->external.bodies_count] = body;
+            quadtree->external.bodies_count++;
+            break;
+        }
         quadtree->type = QUADTREE_INTERNAL;
-        struct body original_body = quadtree->body;
-        quadtree->children.nw = quadtree_new();
-        quadtree->children.ne = quadtree_new();
-        quadtree->children.sw = quadtree_new();
-        quadtree->children.se = quadtree_new();
+        struct body original_bodies[QUADTREE_MAX_BODIES_COUNT];
+        memcpy(original_bodies, quadtree->external.bodies, sizeof original_bodies);
+        quadtree->internal.nw = quadtree_new();
+        quadtree->internal.ne = quadtree_new();
+        quadtree->internal.sw = quadtree_new();
+        quadtree->internal.se = quadtree_new();
         double mid_x = quadtree->start_x + (quadtree->end_x - quadtree->start_x) / 2.0;
         double mid_y = quadtree->start_y + (quadtree->end_y - quadtree->start_y) / 2.0;
         // nw
-        quadtree->children.nw->start_x = quadtree->start_x;
-        quadtree->children.nw->end_x = mid_x;
-        quadtree->children.nw->start_y = quadtree->start_y;
-        quadtree->children.nw->end_y = mid_y;
+        quadtree->internal.nw->start_x = quadtree->start_x;
+        quadtree->internal.nw->end_x = mid_x;
+        quadtree->internal.nw->start_y = quadtree->start_y;
+        quadtree->internal.nw->end_y = mid_y;
         // ne
-        quadtree->children.ne->start_x = mid_x;
-        quadtree->children.ne->end_x = quadtree->end_x;
-        quadtree->children.ne->start_y = quadtree->start_y;
-        quadtree->children.ne->end_y = mid_y;
+        quadtree->internal.ne->start_x = mid_x;
+        quadtree->internal.ne->end_x = quadtree->end_x;
+        quadtree->internal.ne->start_y = quadtree->start_y;
+        quadtree->internal.ne->end_y = mid_y;
         // sw
-        quadtree->children.sw->start_x = quadtree->start_x;
-        quadtree->children.sw->end_x = mid_x;
-        quadtree->children.sw->start_y = mid_y;
-        quadtree->children.sw->end_y = quadtree->end_y;
+        quadtree->internal.sw->start_x = quadtree->start_x;
+        quadtree->internal.sw->end_x = mid_x;
+        quadtree->internal.sw->start_y = mid_y;
+        quadtree->internal.sw->end_y = quadtree->end_y;
         // se
-        quadtree->children.se->start_x = mid_x;
-        quadtree->children.se->end_x = quadtree->end_x;
-        quadtree->children.se->start_y = mid_y;
-        quadtree->children.se->end_y = quadtree->end_y;
-        quadtree_insert(quadtree, original_body);  // reinsert the original body
+        quadtree->internal.se->start_x = mid_x;
+        quadtree->internal.se->end_x = quadtree->end_x;
+        quadtree->internal.se->start_y = mid_y;
+        quadtree->internal.se->end_y = quadtree->end_y;
+        // reinsert the original bodies
+        for (size_t i = 0; i < QUADTREE_MAX_BODIES_COUNT; i++)
+            quadtree_insert(quadtree, original_bodies[i]);
         quadtree_insert(quadtree, body);           // treated as an internal node now
         break;
     case QUADTREE_INTERNAL:
-        if (in_boundary(quadtree->children.nw, body))
-            child = quadtree->children.nw;
-        else if (in_boundary(quadtree->children.ne, body))
-            child = quadtree->children.ne;
-        else if (in_boundary(quadtree->children.sw, body))
-            child = quadtree->children.sw;
-        else if (in_boundary(quadtree->children.se, body))
-            child = quadtree->children.se;
+        if (in_boundary(quadtree->internal.nw, body))
+            child = quadtree->internal.nw;
+        else if (in_boundary(quadtree->internal.ne, body))
+            child = quadtree->internal.ne;
+        else if (in_boundary(quadtree->internal.sw, body))
+            child = quadtree->internal.sw;
+        else if (in_boundary(quadtree->internal.se, body))
+            child = quadtree->internal.se;
         quadtree_insert(child, body);
         break;
     }
@@ -96,31 +106,39 @@ quadtree_update_mass(struct quadtree *quadtree)
     {
     case QUADTREE_EMPTY: break;
     case QUADTREE_EXTERNAL:
-        quadtree->total_mass = quadtree->body.mass;
-        quadtree->center_of_mass_x = quadtree->body.x;
-        quadtree->center_of_mass_y = quadtree->body.y;
+        quadtree->total_mass = 0.0;
+        quadtree->center_of_mass_x = 0.0;
+        quadtree->center_of_mass_y = 0.0;
+        for (size_t i = 0; i < quadtree->external.bodies_count; i++)
+        {
+            quadtree->total_mass += quadtree->external.bodies[i].mass;
+            quadtree->center_of_mass_x += quadtree->external.bodies[i].x * quadtree->external.bodies[i].mass;
+            quadtree->center_of_mass_y += quadtree->external.bodies[i].y * quadtree->external.bodies[i].mass;
+        }
+        quadtree->center_of_mass_x /= quadtree->total_mass;
+        quadtree->center_of_mass_y /= quadtree->total_mass;
         break;
     case QUADTREE_INTERNAL:
-        quadtree_update_mass(quadtree->children.nw);
-        quadtree_update_mass(quadtree->children.ne);
-        quadtree_update_mass(quadtree->children.sw);
-        quadtree_update_mass(quadtree->children.se);
+        quadtree_update_mass(quadtree->internal.nw);
+        quadtree_update_mass(quadtree->internal.ne);
+        quadtree_update_mass(quadtree->internal.sw);
+        quadtree_update_mass(quadtree->internal.se);
         quadtree->total_mass =
-            quadtree->children.nw->total_mass + quadtree->children.ne->total_mass +
-            quadtree->children.sw->total_mass + quadtree->children.se->total_mass;
+            quadtree->internal.nw->total_mass + quadtree->internal.ne->total_mass +
+            quadtree->internal.sw->total_mass + quadtree->internal.se->total_mass;
         // x center of mass
         quadtree->center_of_mass_x =
-            quadtree->children.nw->center_of_mass_x * quadtree->children.nw->total_mass +
-            quadtree->children.ne->center_of_mass_x * quadtree->children.ne->total_mass +
-            quadtree->children.sw->center_of_mass_x * quadtree->children.sw->total_mass +
-            quadtree->children.se->center_of_mass_x * quadtree->children.se->total_mass;
+            quadtree->internal.nw->center_of_mass_x * quadtree->internal.nw->total_mass +
+            quadtree->internal.ne->center_of_mass_x * quadtree->internal.ne->total_mass +
+            quadtree->internal.sw->center_of_mass_x * quadtree->internal.sw->total_mass +
+            quadtree->internal.se->center_of_mass_x * quadtree->internal.se->total_mass;
         quadtree->center_of_mass_x /= quadtree->total_mass;
         // y center of mass
         quadtree->center_of_mass_y =
-            quadtree->children.nw->center_of_mass_y * quadtree->children.nw->total_mass +
-            quadtree->children.ne->center_of_mass_y * quadtree->children.ne->total_mass +
-            quadtree->children.sw->center_of_mass_y * quadtree->children.sw->total_mass +
-            quadtree->children.se->center_of_mass_y * quadtree->children.se->total_mass;
+            quadtree->internal.nw->center_of_mass_y * quadtree->internal.nw->total_mass +
+            quadtree->internal.ne->center_of_mass_y * quadtree->internal.ne->total_mass +
+            quadtree->internal.sw->center_of_mass_y * quadtree->internal.sw->total_mass +
+            quadtree->internal.se->center_of_mass_y * quadtree->internal.se->total_mass;
         quadtree->center_of_mass_y /= quadtree->total_mass;
         break;
     }
@@ -139,7 +157,15 @@ quadtree_force(const struct quadtree *quadtree,
         return;
     if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a body
     {
-        body_gravitational_force(body, &quadtree->body, gravity, force_x, force_y);
+        *force_x = 0.0;
+        *force_y = 0.0;
+        for (size_t i = 0; i < quadtree->external.bodies_count; i++)
+        {
+            double fx = 0.0, fy = 0.0;
+            body_gravitational_force(body, &quadtree->external.bodies[i], gravity, &fx, &fy);
+            *force_x += fx;
+            *force_y += fy;
+        }
         return;
     }
     // Check if we can approximate internal node
@@ -162,10 +188,10 @@ quadtree_force(const struct quadtree *quadtree,
     // Compute force for all region
     double nw_force_x = 0.0, nw_force_y = 0.0, ne_force_x = 0.0, ne_force_y = 0.0, sw_force_x = 0.0,
            sw_force_y = 0.0, se_force_x = 0.0, se_force_y = 0.0;
-    quadtree_force(quadtree->children.nw, body, gravity, &nw_force_x, &nw_force_y);
-    quadtree_force(quadtree->children.ne, body, gravity, &ne_force_x, &ne_force_y);
-    quadtree_force(quadtree->children.sw, body, gravity, &sw_force_x, &sw_force_y);
-    quadtree_force(quadtree->children.se, body, gravity, &se_force_x, &se_force_y);
+    quadtree_force(quadtree->internal.nw, body, gravity, &nw_force_x, &nw_force_y);
+    quadtree_force(quadtree->internal.ne, body, gravity, &ne_force_x, &ne_force_y);
+    quadtree_force(quadtree->internal.sw, body, gravity, &sw_force_x, &sw_force_y);
+    quadtree_force(quadtree->internal.se, body, gravity, &se_force_x, &se_force_y);
     *force_x = nw_force_x + ne_force_x + sw_force_x + se_force_x;
     *force_y = nw_force_y + ne_force_y + sw_force_y + se_force_y;
 }

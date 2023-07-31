@@ -2,7 +2,7 @@ project(
   'n-body',
   'c',
   default_options : [
-    'c_std=c99',
+    'c_std=c11',
     'warning_level=everything',
     'optimization=3',
   ],

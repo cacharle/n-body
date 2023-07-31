@@ -31,7 +31,7 @@ struct worker_arg
     struct quadtree *quadtree;
 };
 
-void *
+static void *
 worker_func(struct worker_arg *arg)
 {
     for (size_t i = arg->start_index; i < arg->stop_index; i++)
@@ -159,7 +159,7 @@ main(int argc, char **argv)
             };
             pthread_create(&threads[i], NULL, (void *(*)(void *))worker_func, &threads_args[i]);
         }
-        for (int i = 0; i < threads_count; i++)
+        for (size_t i = 0; i < threads_count; i++)
             pthread_join(threads[i], NULL);
         quadtree_destroy(bodies_quadtree);
         draw_update(bodies, bodies_count, flag_mass);
