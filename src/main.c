@@ -21,7 +21,7 @@ static size_t             threads_count = 1;
 static pthread_t         *threads = NULL;
 static struct worker_arg *threads_args = NULL;
 static bool               flag_mass = false;
-static void (*flag_bodies_initialization_function)(struct body *) = body_init_random_in_unit_circle;
+static void (*flag_bodies_initialization_function)(struct body *) = body_init_random_circle;
 static float gravity = 0.0005f;
 
 struct worker_arg
@@ -92,9 +92,11 @@ main(int argc, char **argv)
             if (strcmp(optarg, "uniform") == 0)
                 flag_bodies_initialization_function = body_init_random_uniform;
             else if (strcmp(optarg, "circle") == 0)
-                flag_bodies_initialization_function = body_init_random_in_unit_circle;
+                flag_bodies_initialization_function = body_init_random_circle;
+            else if (strcmp(optarg, "thorus") == 0)
+                flag_bodies_initialization_function = body_init_random_thorus;
             else
-                die("'%s' is not a valid body initialization");
+                die("'%s' is not a valid body initialization", optarg);
             break;
         case 'g':
             errno = 0;

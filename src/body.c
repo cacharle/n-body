@@ -12,7 +12,7 @@ body_init_random_uniform(struct body *body)
 }
 
 void
-body_init_random_in_unit_circle(struct body *body)
+body_init_random_circle(struct body *body)
 {
     do
     {
@@ -20,6 +20,20 @@ body_init_random_in_unit_circle(struct body *body)
         body->x = body->x * 2.0f - 1.0f;
         body->y = body->y * 2.0f - 1.0f;
     } while (sqrtf(body->x * body->x + body->y * body->y) > 0.5f);
+    body->x += 0.5f;
+    body->y += 0.5f;
+}
+
+void
+body_init_random_thorus(struct body *body)
+{
+    do
+    {
+        body_init_random_uniform(body);
+        body->x = body->x * 2.0f - 1.0f;
+        body->y = body->y * 2.0f - 1.0f;
+    } while (sqrtf(body->x * body->x + body->y * body->y) > 0.5f ||
+             sqrtf(body->x * body->x + body->y * body->y) < 0.2f);
     body->x += 0.5f;
     body->y += 0.5f;
 }
@@ -46,7 +60,7 @@ body_gravitational_force(const struct body *b1,
 
     float dx = b1->x - b2->x;
     float dy = b1->y - b2->y;
-    float magnitude_inverse = 1.0 / sqrtf(dx * dx + dy * dy);
+    float magnitude_inverse = rsqrt(dx * dx + dy * dy);
     dx *= magnitude_inverse;
     dy *= magnitude_inverse;
     dx *= force;
@@ -69,6 +83,38 @@ body_gravitational_force_avx2(const struct body *dest_body,
 {
     *force_x = 0.0;
     *force_y = 0.0;
+
+    for (int i = 0; i < 8; i++)
+    {
+        const struct body *b1 = dest_body;
+        const struct body *b2 = &bodies[i];
+        if (fabsf(b1->x - b2->x) < 0.01f || fabsf(b1->y - b2->y) < 0.01f)
+            return;
+        float distance_x = b1->x - b2->x;
+        float distance_y = b1->y - b2->y;
+        float distance_square = distance_x * distance_x + distance_y * distance_y;
+        float force = (b1->mass * b2->mass * gravity) /
+                      distance_square;  // maybe we can remove the `b1->mass *` because we end up
+                                        // dividing by it at the end
+
+        float dx = b1->x - b2->x;
+        float dy = b1->y - b2->y;
+        float magnitude_inverse = rsqrt(dx * dx + dy * dy);
+        dx *= magnitude_inverse;
+        dy *= magnitude_inverse;
+        dx *= force;
+        dy *= force;
+        if (!isnan(dx) && !isnan(dy))
+        {
+            *force_x += dx;
+            *force_y += dy;
+        }
+    }
+    return;
+
+    // struct body bodies[8] ;
+    // memcpy(bodies, bodies_origin, sizeof bodies);
+
     __m256 m_gravity = _mm256_set1_ps(gravity);
 
     __m256 bodies_x = _mm256_setr_ps(bodies[0].x,
@@ -99,6 +145,15 @@ body_gravitational_force_avx2(const struct body *dest_body,
     __m256 dest_x = _mm256_set1_ps(dest_body->x);
     __m256 dest_y = _mm256_set1_ps(dest_body->y);
     __m256 dest_mass = _mm256_set1_ps(dest_body->mass);
+
+    // _mm256_abs_ps(_mm256_sub_ps(dest_x, bodies_x))
+
+    // for (int i = 0; i < 8; i++)
+    // {
+    //     if (fabsf(dest_body->x - bodies[i].x) < 0.01f || fabsf(dest_body->y - bodies[i].y) <
+    //     0.01f)
+    //         bodies[i].mass = 0.0f;
+    // }
 
     __m256 distance_x = _mm256_sub_ps(bodies_x, dest_x);
     __m256 distance_y = _mm256_sub_ps(bodies_y, dest_y);

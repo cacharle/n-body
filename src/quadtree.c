@@ -175,10 +175,8 @@ quadtree_force(const struct quadtree *quadtree,
     float area_width = fabsf(quadtree->end_x - quadtree->start_x);
     float distance_x = quadtree->center_of_mass_x - body->x;
     float distance_y = quadtree->center_of_mass_y - body->y;
-    float inverse_distance = 1.0f / sqrtf(distance_x * distance_x + distance_y * distance_y);
-    // float distance = sqrt(distance_x * distance_x + distance_y * distance_y);
+    float inverse_distance = rsqrt(distance_x * distance_x + distance_y * distance_y);
     float ratio = area_width * inverse_distance;
-    // float ratio = area_width / distance;
     if (ratio < approximate_distance_threshold)
     {
         body_gravitational_force(body,

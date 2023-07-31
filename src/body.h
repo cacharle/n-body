@@ -17,7 +17,9 @@ struct body
 void
 body_init_random_uniform(struct body *body);
 void
-body_init_random_in_unit_circle(struct body *body);
+body_init_random_circle(struct body *body);
+void
+body_init_random_thorus(struct body *body);
 void
 body_gravitational_force(const struct body *b1,
                          const struct body *b2,
