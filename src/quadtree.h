@@ -43,7 +43,8 @@ struct quadtree
     };
 };
 
-struct quadtree_stats {
+struct quadtree_stats
+{
     size_t node_count;
     size_t empty_count;
     size_t external_count;

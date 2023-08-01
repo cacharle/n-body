@@ -4,5 +4,5 @@ sources = files(
   'quadtree.c',
   'draw.c',
   'utils.c',
-  'hello.cu',
+  'kernel.cu',
 )

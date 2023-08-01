@@ -196,18 +196,14 @@ quadtree_stats(const struct quadtree *quadtree, struct quadtree_stats *stats)
     stats->node_count++;
     switch (quadtree->type)
     {
-        case QUADTREE_EMPTY:
-            stats->empty_count++;
-            break;
-        case QUADTREE_EXTERNAL:
-            stats->external_count++;
-            break;
-        case QUADTREE_INTERNAL:
-            stats->internal_count++;
-            quadtree_stats(quadtree->internal.nw, stats);
-            quadtree_stats(quadtree->internal.ne, stats);
-            quadtree_stats(quadtree->internal.sw, stats);
-            quadtree_stats(quadtree->internal.se, stats);
-            break;
+    case QUADTREE_EMPTY: stats->empty_count++; break;
+    case QUADTREE_EXTERNAL: stats->external_count++; break;
+    case QUADTREE_INTERNAL:
+        stats->internal_count++;
+        quadtree_stats(quadtree->internal.nw, stats);
+        quadtree_stats(quadtree->internal.ne, stats);
+        quadtree_stats(quadtree->internal.sw, stats);
+        quadtree_stats(quadtree->internal.se, stats);
+        break;
     }
 }

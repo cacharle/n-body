@@ -39,6 +39,7 @@ UI Controls:
 | 16 workers                                                | 46000             | a2b40ee   |
 | External nodes of the quadtree containing multiple bodies | 55000             | ad5ed61   |
 | AVX2 on external nodes groups                             | 65000             | d51a7ab   |
+| GPU naive approche                                        | 10000             |           |
 
 ### Optimization ideas
 
@@ -46,10 +47,10 @@ UI Controls:
 - [x] multithreading
 - [x] quadtree with external node containing 4 bodies and computing 4 force at a time with AVX2
 - [ ] store quadtrees in a dynamic array and reuse that array when rebuilding the quadtree (would save a lot of malloc time)
-- [-] compute the force between 2 bodies and **apply** that force to **2** bodies (we compute the force twice now)
-    Would be too complicated to write since there is a ton of approximation with quadtrees.
-- [ ] Naive approch on GPU
+- [x] Naive approch on GPU
 - [ ] quadtree on GPU (possible by putting the quadtree's node in an array)
+- [x] ~~compute the force between 2 bodies and **apply** that force to **2** bodies (we compute the force twice now)~~
+    Will not be done: Would be too complicated to write since there is a ton of approximation with quadtrees.
 
 ## Resources
 

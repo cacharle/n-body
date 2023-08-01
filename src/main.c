@@ -20,10 +20,10 @@ static const float        time_step = 0.001f;
 static size_t             threads_count = 1;
 static pthread_t         *threads = NULL;
 static struct worker_arg *threads_args = NULL;
+static float              gravity = 0.0005f;
 static bool               flag_mass = false;
+static bool               flag_debug = false;
 static void (*flag_bodies_initialization_function)(struct body *) = body_init_random_circle;
-static float gravity = 0.0005f;
-static bool flag_debug = false;
 
 struct worker_arg
 {
@@ -50,7 +50,8 @@ worker_func(struct worker_arg *arg)
     return NULL;
 }
 
-extern void kernel_function();
+extern void
+update_bodies_naive(struct body *bodies_cpu, size_t bodies_count, float gravity);
 
 int
 main(int argc, char **argv)
@@ -108,9 +109,7 @@ main(int argc, char **argv)
             if (errno != 0)
                 die("Invalid argument to -w: %s", optarg);
             break;
-        case 'd':
-            flag_debug = true;
-            break;
+        case 'd': flag_debug = true; break;
         }
     }
 
@@ -148,49 +147,54 @@ main(int argc, char **argv)
             SDL_Delay(10);
             continue;
         }
+        update_bodies_naive(bodies, bodies_count, gravity);
         // Create a quadtree
-        struct quadtree *bodies_quadtree = quadtree_new();
-        bodies_quadtree->start_x = -1.0;
-        bodies_quadtree->start_y = -1.0;
-        bodies_quadtree->end_x = 2.0;
-        bodies_quadtree->end_y = 2.0;
-        for (size_t i = 0; i < bodies_count; i++)
-            quadtree_insert(bodies_quadtree, bodies[i]);
-        quadtree_update_mass(bodies_quadtree);
-        if (flag_debug)
-        {
-            struct quadtree_stats stats = {0};
-            quadtree_stats(bodies_quadtree, &stats);
-            printf(
-                "stats:\n"
-                "\tnode count:     %5zu\n"
-                "\tempty count:    %5zu\n"
-                "\texternal count: %5zu, average bodies in external %5.1f\n"
-                "\tInternal count: %5zu\n",
-                stats.node_count,
-                stats.empty_count,
-                stats.external_count,
-                (double)bodies_count / (double)stats.external_count,
-                stats.internal_count
-            );
-        }
-        // Create threads to compute the gravitational forces
-        size_t stride = bodies_count / threads_count;
-        for (size_t i = 0, start_index = 0; i < threads_count; i++, start_index += stride)
-        {
-            threads_args[i] = (struct worker_arg){
-                .start_index = start_index,
-                .stop_index = start_index + stride,
-                .quadtree = bodies_quadtree,
-            };
-            pthread_create(&threads[i], NULL, (void *(*)(void *))worker_func, &threads_args[i]);
-        }
-        for (size_t i = 0; i < threads_count; i++)
-            pthread_join(threads[i], NULL);
-        draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
-        quadtree_destroy(bodies_quadtree);
+        // struct quadtree *bodies_quadtree = quadtree_new();
+        // bodies_quadtree->start_x = -1.0;
+        // bodies_quadtree->start_y = -1.0;
+        // bodies_quadtree->end_x = 2.0;
+        // bodies_quadtree->end_y = 2.0;
+        // for (size_t i = 0; i < bodies_count; i++)
+        //     quadtree_insert(bodies_quadtree, bodies[i]);
+        // quadtree_update_mass(bodies_quadtree);
+        // if (flag_debug)
+        // {
+        //     struct quadtree_stats stats = {0};
+        //     quadtree_stats(bodies_quadtree, &stats);
+        //     printf(
+        //         "stats:\n"
+        //         "\tnode count:     %5zu\n"
+        //         "\tempty count:    %5zu\n"
+        //         "\texternal count: %5zu, average bodies in external %5.1f\n"
+        //         "\tInternal count: %5zu\n",
+        //         stats.node_count,
+        //         stats.empty_count,
+        //         stats.external_count,
+        //         (double)bodies_count / (double)stats.external_count,
+        //         stats.internal_count
+        //     );
+        // }
+        // // Create threads to compute the gravitational forces
+        // size_t stride = bodies_count / threads_count;
+        // for (size_t i = 0, start_index = 0; i < threads_count; i++, start_index += stride)
+        // {
+        //     threads_args[i] = (struct worker_arg){
+        //         .start_index = start_index,
+        //         .stop_index = start_index + stride,
+        //         .quadtree = bodies_quadtree,
+        //     };
+        //     pthread_create(&threads[i], NULL, (void *(*)(void *))worker_func, &threads_args[i]);
+        // }
+        // for (size_t i = 0; i < threads_count; i++)
+        //     pthread_join(threads[i], NULL);
+        // draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
+        draw_update(bodies, bodies_count, flag_mass, NULL);
+        // quadtree_destroy(bodies_quadtree);
         // SDL_Delay(100);
     }
+    free(threads);
+    free(threads_args);
+    free(bodies);
     draw_quit();
     return EXIT_SUCCESS;
 }
