@@ -23,6 +23,7 @@ static struct worker_arg *threads_args = NULL;
 static float              gravity = 0.0005f;
 static bool               flag_mass = false;
 static bool               flag_debug = false;
+static bool               flag_black_hole = false;
 static void (*flag_bodies_initialization_function)(struct body *) = body_init_random_circle;
 
 struct worker_arg
@@ -58,7 +59,7 @@ main(int argc, char **argv)
 {
     threads_count = sysconf(_SC_NPROCESSORS_ONLN);
     int option;
-    while ((option = getopt(argc, argv, "hb:w:mi:g:d")) != -1)
+    while ((option = getopt(argc, argv, "hb:ow:mi:g:d")) != -1)
     {
         switch (option)
         {
@@ -66,6 +67,7 @@ main(int argc, char **argv)
             printf("Usage: n-body\n"
                    "\t-h Print this message\n"
                    "\t-b Number of body (default: %zu)\n"
+                   "\t-o Add a \"black hole\" in the center\n"
                    "\t-w Number of workers (default: number of cpu cores)\n"
                    "\t-m Assign a random mass to bodies and draw that mass\n"
                    "\t\t(all bodies have the same mass by default)\n"
@@ -85,6 +87,9 @@ main(int argc, char **argv)
             bodies_count = strtoul(optarg, NULL, 10);
             if (errno != 0)
                 die("Invalid argument to -b: %s", optarg);
+            break;
+        case 'o':
+            flag_black_hole = true;
             break;
         case 'w':
             errno = 0;
@@ -112,6 +117,8 @@ main(int argc, char **argv)
         case 'd': flag_debug = true; break;
         }
     }
+    if (flag_black_hole)
+        bodies_count++;
 
     // Get a random seed from the system
     FILE *random_file = fopen("/dev/random", "r");
@@ -131,6 +138,12 @@ main(int argc, char **argv)
         if (flag_mass)
             bodies[i].mass = frand() + 0.3;
     }
+    if (flag_black_hole)
+    {
+        bodies[0].x = 0.5;
+        bodies[0].y = 0.5;
+        bodies[0].mass = 100.0f;
+    }
 
     // Initialize threads
     threads = xmalloc(sizeof(pthread_t *) * threads_count);
@@ -147,49 +160,49 @@ main(int argc, char **argv)
             SDL_Delay(10);
             continue;
         }
-        update_bodies_naive(bodies, bodies_count, gravity);
+        // update_bodies_naive(bodies, bodies_count, gravity);
         // Create a quadtree
-        // struct quadtree *bodies_quadtree = quadtree_new();
-        // bodies_quadtree->start_x = -1.0;
-        // bodies_quadtree->start_y = -1.0;
-        // bodies_quadtree->end_x = 2.0;
-        // bodies_quadtree->end_y = 2.0;
-        // for (size_t i = 0; i < bodies_count; i++)
-        //     quadtree_insert(bodies_quadtree, bodies[i]);
-        // quadtree_update_mass(bodies_quadtree);
-        // if (flag_debug)
-        // {
-        //     struct quadtree_stats stats = {0};
-        //     quadtree_stats(bodies_quadtree, &stats);
-        //     printf(
-        //         "stats:\n"
-        //         "\tnode count:     %5zu\n"
-        //         "\tempty count:    %5zu\n"
-        //         "\texternal count: %5zu, average bodies in external %5.1f\n"
-        //         "\tInternal count: %5zu\n",
-        //         stats.node_count,
-        //         stats.empty_count,
-        //         stats.external_count,
-        //         (double)bodies_count / (double)stats.external_count,
-        //         stats.internal_count
-        //     );
-        // }
-        // // Create threads to compute the gravitational forces
-        // size_t stride = bodies_count / threads_count;
-        // for (size_t i = 0, start_index = 0; i < threads_count; i++, start_index += stride)
-        // {
-        //     threads_args[i] = (struct worker_arg){
-        //         .start_index = start_index,
-        //         .stop_index = start_index + stride,
-        //         .quadtree = bodies_quadtree,
-        //     };
-        //     pthread_create(&threads[i], NULL, (void *(*)(void *))worker_func, &threads_args[i]);
-        // }
-        // for (size_t i = 0; i < threads_count; i++)
-        //     pthread_join(threads[i], NULL);
-        // draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
-        draw_update(bodies, bodies_count, flag_mass, NULL);
-        // quadtree_destroy(bodies_quadtree);
+        struct quadtree *bodies_quadtree = quadtree_new();
+        bodies_quadtree->start_x = -1.0;
+        bodies_quadtree->start_y = -1.0;
+        bodies_quadtree->end_x = 2.0;
+        bodies_quadtree->end_y = 2.0;
+        for (size_t i = 0; i < bodies_count; i++)
+            quadtree_insert(bodies_quadtree, bodies[i]);
+        quadtree_update_mass(bodies_quadtree);
+        if (flag_debug)
+        {
+            struct quadtree_stats stats = {0};
+            quadtree_stats(bodies_quadtree, &stats);
+            printf(
+                "stats:\n"
+                "\tnode count:     %5zu\n"
+                "\tempty count:    %5zu\n"
+                "\texternal count: %5zu, average bodies in external %5.1f\n"
+                "\tInternal count: %5zu\n",
+                stats.node_count,
+                stats.empty_count,
+                stats.external_count,
+                (double)bodies_count / (double)stats.external_count,
+                stats.internal_count
+            );
+        }
+        // Create threads to compute the gravitational forces
+        size_t stride = bodies_count / threads_count;
+        for (size_t i = 0, start_index = 0; i < threads_count; i++, start_index += stride)
+        {
+            threads_args[i] = (struct worker_arg){
+                .start_index = start_index,
+                .stop_index = start_index + stride,
+                .quadtree = bodies_quadtree,
+            };
+            pthread_create(&threads[i], NULL, (void *(*)(void *))worker_func, &threads_args[i]);
+        }
+        for (size_t i = 0; i < threads_count; i++)
+            pthread_join(threads[i], NULL);
+        draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
+        // // draw_update(bodies, bodies_count, flag_mass, NULL);
+        quadtree_destroy(bodies_quadtree);
         // SDL_Delay(100);
     }
     free(threads);

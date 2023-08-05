@@ -80,7 +80,7 @@ body_gravitational_force_avx2(const struct body *dest_body,
     *force_x = 0.0;
     *force_y = 0.0;
 
-    __m256 bodies_x = _mm256_set_ps(bodies[0].x,
+    const __m256 bodies_x = _mm256_set_ps(bodies[0].x,
                                     bodies[1].x,
                                     bodies[2].x,
                                     bodies[3].x,
@@ -88,7 +88,7 @@ body_gravitational_force_avx2(const struct body *dest_body,
                                     bodies[5].x,
                                     bodies[6].x,
                                     bodies[7].x);
-    __m256 bodies_y = _mm256_set_ps(bodies[0].y,
+    const __m256 bodies_y = _mm256_set_ps(bodies[0].y,
                                     bodies[1].y,
                                     bodies[2].y,
                                     bodies[3].y,
@@ -96,7 +96,7 @@ body_gravitational_force_avx2(const struct body *dest_body,
                                     bodies[5].y,
                                     bodies[6].y,
                                     bodies[7].y);
-    __m256 bodies_mass = _mm256_set_ps(bodies[0].mass,
+    const __m256 bodies_mass = _mm256_set_ps(bodies[0].mass,
                                        bodies[1].mass,
                                        bodies[2].mass,
                                        bodies[3].mass,
@@ -105,22 +105,22 @@ body_gravitational_force_avx2(const struct body *dest_body,
                                        bodies[6].mass,
                                        bodies[7].mass);
 
-    __m256 dest_x = _mm256_set1_ps(dest_body->x);
-    __m256 dest_y = _mm256_set1_ps(dest_body->y);
-    __m256 dest_mass = _mm256_set1_ps(dest_body->mass);
+    const __m256 dest_x = _mm256_set1_ps(dest_body->x);
+    const __m256 dest_y = _mm256_set1_ps(dest_body->y);
+    const __m256 dest_mass = _mm256_set1_ps(dest_body->mass);
 
-    __m256 distance_x = _mm256_sub_ps(bodies_x, dest_x);
-    __m256 distance_y = _mm256_sub_ps(bodies_y, dest_y);
-    __m256 distance_square =
+    const __m256 distance_x = _mm256_sub_ps(bodies_x, dest_x);
+    const __m256 distance_y = _mm256_sub_ps(bodies_y, dest_y);
+    const __m256 distance_square =
         _mm256_add_ps(_mm256_mul_ps(distance_x, distance_x), _mm256_mul_ps(distance_y, distance_y));
-    __m256 force =
+    const __m256 force =
         _mm256_div_ps(_mm256_mul_ps(_mm256_mul_ps(dest_mass, bodies_mass), _mm256_set1_ps(gravity)),
                       distance_square);
 
     __m256 dx = _mm256_sub_ps(dest_x, bodies_x);
     __m256 dy = _mm256_sub_ps(dest_y, bodies_y);
 
-    __m256 magnitude_inverse =
+    const __m256 magnitude_inverse =
         _mm256_rsqrt_ps(_mm256_add_ps(_mm256_mul_ps(dx, dx), _mm256_mul_ps(dy, dy)));
 
     dx = _mm256_mul_ps(dx, magnitude_inverse);
@@ -128,12 +128,12 @@ body_gravitational_force_avx2(const struct body *dest_body,
     dx = _mm256_mul_ps(dx, force);
     dy = _mm256_mul_ps(dy, force);
 
-    __m256i too_close_mask = _mm256_cvtps_epi32(_mm256_and_ps(
+    const __m256i too_close_mask = _mm256_cvtps_epi32(_mm256_and_ps(
         _mm256_cmp_ps(_mm256_andnot_ps(_mm256_sub_ps(dest_x, bodies_x), _mm256_set1_ps(-0.0f)),
-                      _mm256_set1_ps(0.01f),
+                      _mm256_set1_ps(0.0001f),
                       _CMP_GT_OQ),
         _mm256_cmp_ps(_mm256_andnot_ps(_mm256_sub_ps(dest_y, bodies_y), _mm256_set1_ps(-0.0f)),
-                      _mm256_set1_ps(0.01f),
+                      _mm256_set1_ps(0.0001f),
                       _CMP_GT_OQ)));
 
     float dxs[8] = {0.0};

@@ -125,8 +125,8 @@ draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
     size_t points_i = 0;
     for (size_t i = 0; i < bodies_count; i++)
     {
-        uint32_t canvas_x = bodies[i].x * (float)window_width;
-        uint32_t canvas_y = bodies[i].y * (float)window_height;
+        uint32_t canvas_x = (bodies[i].x / 2.0 + 0.25) * (float)window_width;
+        uint32_t canvas_y = (bodies[i].y / 2.0 + 0.25) * (float)window_height;
         if (!mass)
         {
             if (canvas_x < 0 || canvas_x > window_width || canvas_y < 0 || canvas_y > window_height)

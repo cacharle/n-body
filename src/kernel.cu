@@ -74,7 +74,7 @@ extern "C" void update_bodies_naive(struct body *bodies_host, size_t bodies_coun
     dim3 threads_dim(threads_count, threads_count);
     dim3 blocks_dim(blocks_count, blocks_count);
     bodies_gravitational_force_update<<<blocks_dim, threads_dim>>>(bodies, bodies_origin, bodies_count, gravity);
-
+    cudaDeviceSynchronize();
     threads_count = 256;
     blocks_count = (bodies_count + threads_count - 1) / threads_count;
     threads_dim = dim3(threads_count);

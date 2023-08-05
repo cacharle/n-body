@@ -39,7 +39,7 @@ UI Controls:
 | 16 workers                                                | 46000             | a2b40ee   |
 | External nodes of the quadtree containing multiple bodies | 55000             | ad5ed61   |
 | AVX2 on external nodes groups                             | 65000             | d51a7ab   |
-| GPU naive approche                                        | 10000             |           |
+| GPU naive approche                                        | 10000             | 7ee7844   |
 
 ### Optimization ideas
 
