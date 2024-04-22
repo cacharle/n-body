@@ -2,7 +2,12 @@
 
 const float time_step = 0.001f;
 
-__global__ void bodies_gravitational_force_update(struct body *bodies, struct body *bodies_origin, size_t bodies_count, float gravity) {
+__global__ void bodies_gravitational_force_update(
+    struct body *bodies,
+    struct body *bodies_origin,
+    size_t bodies_count,
+    float gravity
+) {
     size_t b1_id = blockIdx.x * blockDim.x + threadIdx.x;
     size_t b2_id = blockIdx.y * blockDim.y + threadIdx.y;
     if (b1_id >= bodies_count || b2_id >= bodies_count)
@@ -73,7 +78,12 @@ extern "C" void update_bodies_naive(struct body *bodies_host, size_t bodies_coun
     size_t blocks_count = (bodies_count + threads_count - 1) / threads_count;
     dim3 threads_dim(threads_count, threads_count);
     dim3 blocks_dim(blocks_count, blocks_count);
-    bodies_gravitational_force_update<<<blocks_dim, threads_dim>>>(bodies, bodies_origin, bodies_count, gravity);
+    bodies_gravitational_force_update<<<blocks_dim, threads_dim>>>(
+        bodies,
+        bodies_origin,
+        bodies_count,
+        gravity
+    );
     cudaDeviceSynchronize();
     threads_count = 256;
     blocks_count = (bodies_count + threads_count - 1) / threads_count;
