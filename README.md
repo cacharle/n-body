@@ -52,6 +52,7 @@ UI Controls:
 - [x] ~~compute the force between 2 bodies and **apply** that force to **2** bodies (we compute the force twice now)~~
     Will not be done: Would be too complicated to write since there is a ton of approximation with quadtrees.
 - [ ] Greengard's fast multipole method
+- [ ] spinning disk start (https://github.com/bneukom/gpu-nbody/blob/master/src/ch/fhnw/woipv/nbody/simulation/universe/RotatingDiskGalaxyGenerator.java)
 
 ## Resources
 

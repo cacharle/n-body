@@ -6,6 +6,7 @@ project(
     'c_std=c11',
     'warning_level=2',
     'optimization=3',
+    # 'b_lto=true',
   ],
 )
 # add_project_arguments('-pg', language : 'c')

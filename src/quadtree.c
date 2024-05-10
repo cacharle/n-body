@@ -1,5 +1,8 @@
+#include <math.h>
+#include <stdlib.h>
 #include "quadtree.h"
 #include "body.h"
+#include "utils.h"
 
 static bool
 in_boundary(struct quadtree *quadtree, struct body body)

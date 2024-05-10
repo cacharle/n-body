@@ -15,7 +15,7 @@ die(const char *format, ...);
 void *
 xmalloc(size_t size);
 float
-frand();
+frand(void);
 float
 rsqrt(float number);
 

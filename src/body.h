@@ -1,11 +1,6 @@
 #ifndef BODY_H
 #define BODY_H
 
-#include "utils.h"
-#include <immintrin.h>
-#include <math.h>
-#include <stdlib.h>
-
 struct body
 {
     float mass;

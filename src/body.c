@@ -1,4 +1,8 @@
 #include "body.h"
+#include <immintrin.h>
+
+#include "utils.h"
+#include <math.h>
 
 void
 body_init_random_uniform(struct body *body)
@@ -7,8 +11,8 @@ body_init_random_uniform(struct body *body)
     body->y = frand();
     // body->mass = frand() + 0.3;
     body->mass = 0.1f;
-    body->velocity_x = 0.0;  // (frand() - 0.5) / 10000;
-    body->velocity_y = 0.0;  // (frand() - 0.5) / 10000;
+    body->velocity_x = 0.0f;  // (frand() - 0.5) / 10000;
+    body->velocity_y = 0.0f;  // (frand() - 0.5) / 10000;
 }
 
 void
@@ -77,8 +81,8 @@ body_gravitational_force(const struct body *b1,
                          float             *force_x,
                          float             *force_y)
 {
-    *force_x = 0.0;
-    *force_y = 0.0;
+    *force_x = 0.0f;
+    *force_y = 0.0f;
     if (fabsf(b1->x - b2->x) < too_close_threshold || fabsf(b1->y - b2->y) < too_close_threshold)
         return;
     float distance_x = b1->x - b2->x;
@@ -109,8 +113,8 @@ body_gravitational_force_avx2(const struct body *dest_body,
                               float             *force_x,
                               float             *force_y)
 {
-    *force_x = 0.0;
-    *force_y = 0.0;
+    *force_x = 0.0f;
+    *force_y = 0.0f;
 
     const __m256 bodies_x = _mm256_set_ps(bodies[0].x,
                                           bodies[1].x,
@@ -168,8 +172,8 @@ body_gravitational_force_avx2(const struct body *dest_body,
                       _mm256_set1_ps(too_close_threshold),
                       _CMP_GT_OQ)));
 
-    float dxs[8] = {0.0};
-    float dys[8] = {0.0};
+    float dxs[8] = {0.0f};
+    float dys[8] = {0.0f};
     _mm256_maskstore_ps(dxs, too_close_mask, dx);
     _mm256_maskstore_ps(dys, too_close_mask, dy);
 

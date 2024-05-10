@@ -22,7 +22,7 @@ xmalloc(size_t size)
 }
 
 float
-frand()
+frand(void)
 {
     return (float)rand() / (float)RAND_MAX;
 }

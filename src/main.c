@@ -53,6 +53,8 @@ worker_func(struct worker_arg *arg)
 
 extern void
 update_bodies_naive(struct body *bodies_cpu, size_t bodies_count, float gravity);
+extern void
+update_bodies_barnes_hut(struct body *bodies_cpu, size_t bodies_count, float gravity);
 
 int
 main(int argc, char **argv)
@@ -165,6 +167,8 @@ main(int argc, char **argv)
             continue;
         }
         // update_bodies_naive(bodies, bodies_count, gravity);
+        update_bodies_barnes_hut(bodies, bodies_count, gravity);
+        //
         // Create a quadtree
         struct quadtree *bodies_quadtree = quadtree_new(bodies, bodies_count);
         for (size_t i = 0; i < bodies_count; i++)
