@@ -101,6 +101,10 @@ main(int argc, char **argv)
                 flag_bodies_initialization_function = body_init_random_uniform;
             else if (strcmp(optarg, "circle") == 0)
                 flag_bodies_initialization_function = body_init_random_circle;
+            else if (strcmp(optarg, "circle_spin") == 0)
+                flag_bodies_initialization_function = body_init_random_circle_spin;
+            else if (strcmp(optarg, "two_circle") == 0)
+                flag_bodies_initialization_function = body_init_random_two_circle;
             else if (strcmp(optarg, "thorus") == 0)
                 flag_bodies_initialization_function = body_init_random_thorus;
             else
@@ -147,6 +151,8 @@ main(int argc, char **argv)
     threads = xmalloc(sizeof(pthread_t *) * threads_count);
     threads_args = xmalloc(sizeof(struct worker_arg) * threads_count);
 
+    long int fps_sum = 0;
+    long int fps_count = 0;
     draw_init();
     bool running = true;
     bool paused = false;
@@ -173,7 +179,8 @@ main(int argc, char **argv)
                    "\tempty count:    %5zu\n"
                    "\texternal count: %5zu, average bodies in external %5.1f\n"
                    "\tinternal count: %5zu\n"
-                   "\tbounds: % .2f,% .2f -> % .2f,% .2f\n",
+                   "\tbounds:         % .2f,% .2f -> % .2f,% .2f\n"
+                   "\taverage fps:    %.2f\n",
                    stats.node_count,
                    stats.empty_count,
                    stats.external_count,
@@ -182,7 +189,8 @@ main(int argc, char **argv)
                    (double)bodies_quadtree->start_x,
                    (double)bodies_quadtree->start_y,
                    (double)bodies_quadtree->end_x,
-                   (double)bodies_quadtree->end_y);
+                   (double)bodies_quadtree->end_y,
+                   (double)fps_sum / (double)fps_count);
         }
         // Create threads to compute the gravitational forces
         size_t stride = bodies_count / threads_count;
@@ -197,7 +205,8 @@ main(int argc, char **argv)
         }
         for (size_t i = 0; i < threads_count; i++)
             pthread_join(threads[i], NULL);
-        draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
+        fps_sum += draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
+        fps_count++;
         quadtree_destroy(bodies_quadtree);
         // SDL_Delay(100);
     }

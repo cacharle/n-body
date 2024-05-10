@@ -14,7 +14,12 @@ enum quadtree_type
     QUADTREE_INTERNAL = 2,
 };
 
-#define QUADTREE_MAX_BODIES_COUNT 8
+#ifndef QUADTREE_MAX_BODIES_COUNT
+# define QUADTREE_MAX_BODIES_COUNT 8
+#endif
+#if QUADTREE_MAX_BODIES_COUNT % 8 != 0 || QUADTREE_MAX_BODIES_COUNT > 32
+# error "Bodies count in quadtree leafs need to be a multiple of 8 and lower than 32 for SIMD"
+#endif
 
 struct quadtree
 {

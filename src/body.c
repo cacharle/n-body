@@ -25,6 +25,36 @@ body_init_random_circle(struct body *body)
 }
 
 void
+body_init_random_circle_spin(struct body *body)
+{
+    body_init_random_circle(body);
+    float x = body->x - 0.5f;
+    float y = body->y - 0.5f;
+    float magnitude = sqrtf(x * x + y * y);
+    float unit_x = x / magnitude;
+    float unit_y = y / magnitude;
+    // https://gamedev.stackexchange.com/questions/70075
+    body->velocity_x = -unit_y * 1.0f;
+    body->velocity_y = unit_x  * 1.0f;
+}
+
+void
+body_init_random_two_circle(struct body *body)
+{
+    body_init_random_circle(body);
+    if (frand() < 0.5f)
+    {
+        body->x -= 0.5f;
+        body->velocity_x = 0.7f;
+    }
+    else
+    {
+        body->x += 0.5f;
+        body->velocity_x = -0.7f;
+    }
+}
+
+void
 body_init_random_thorus(struct body *body)
 {
     do
@@ -38,6 +68,8 @@ body_init_random_thorus(struct body *body)
     body->y += 0.5f;
 }
 
+static const float too_close_threshold = 0.0001f;
+
 void
 body_gravitational_force(const struct body *b1,
                          const struct body *b2,
@@ -47,7 +79,7 @@ body_gravitational_force(const struct body *b1,
 {
     *force_x = 0.0;
     *force_y = 0.0;
-    if (fabsf(b1->x - b2->x) < 0.01f || fabsf(b1->y - b2->y) < 0.01f)
+    if (fabsf(b1->x - b2->x) < too_close_threshold || fabsf(b1->y - b2->y) < too_close_threshold)
         return;
     float distance_x = b1->x - b2->x;
     float distance_y = b1->y - b2->y;
@@ -130,10 +162,10 @@ body_gravitational_force_avx2(const struct body *dest_body,
 
     const __m256i too_close_mask = _mm256_cvtps_epi32(_mm256_and_ps(
         _mm256_cmp_ps(_mm256_andnot_ps(_mm256_sub_ps(dest_x, bodies_x), _mm256_set1_ps(-0.0f)),
-                      _mm256_set1_ps(0.0001f),
+                      _mm256_set1_ps(too_close_threshold),
                       _CMP_GT_OQ),
         _mm256_cmp_ps(_mm256_andnot_ps(_mm256_sub_ps(dest_y, bodies_y), _mm256_set1_ps(-0.0f)),
-                      _mm256_set1_ps(0.0001f),
+                      _mm256_set1_ps(too_close_threshold),
                       _CMP_GT_OQ)));
 
     float dxs[8] = {0.0};

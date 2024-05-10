@@ -51,9 +51,11 @@ UI Controls:
 - [ ] quadtree on GPU (possible by putting the quadtree's node in an array)
 - [x] ~~compute the force between 2 bodies and **apply** that force to **2** bodies (we compute the force twice now)~~
     Will not be done: Would be too complicated to write since there is a ton of approximation with quadtrees.
+- [ ] Greengard's fast multipole method
 
 ## Resources
 
 - [Coding train: n-body simulation video](https://www.youtube.com/watch?v=GjbKsOkN1Oc&t=220s)
 - [William Y.Feng: Quadtrees and the Barnes-Hut algorithm](https://www.youtube.com/watch?v=tOlKLJ4WmSE)
 - [Article on Barnes-Hut](http://arborjs.org/docs/barnes-hut)
+- [An Efficient CUDA Implementation of the Tree-Based Barnes Hut n-Body Algorithm](https://iss.oden.utexas.edu/Publications/Papers/burtscher11.pdf)

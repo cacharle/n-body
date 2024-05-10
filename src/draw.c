@@ -7,11 +7,7 @@ static SDL_Window    *window = NULL;
 static SDL_Renderer  *renderer = NULL;
 static TTF_Font      *font = NULL;
 static const char    *font_paths[] = {"/usr/share/fonts/noto/NotoSansMono-SemiBold.ttf",
-                                      "/System/"
-                                         "Library/"
-                                         "Fonts/"
-                                         "SFNSMono."
-                                         "ttf"};
+                                      "/System/Library/Fonts/SFNSMono.ttf"};
 
 #define SDL_ASSERT_NO_ERROR                                                           \
     do                                                                                \
@@ -83,7 +79,7 @@ draw_handle_events(bool *running, bool *paused)
     }
 }
 
-void
+long int
 draw_update(struct body *bodies, size_t bodies_count, bool mass, struct quadtree *quadtree)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -97,9 +93,10 @@ draw_update(struct body *bodies, size_t bodies_count, bool mass, struct quadtree
     clock_gettime(CLOCK_MONOTONIC, &current_time);
     long int time_difference = current_time.tv_nsec - previous_time.tv_nsec;
     time_difference /= 1000000;
+    long int fps = 0;
     if (time_difference > 0)
     {
-        long int fps = 1000 / time_difference;
+        fps = 1000 / time_difference;
         char     buf[128] = {0};
         snprintf(buf, 128, "%ld fps", fps);
         SDL_Surface *surface = TTF_RenderText_Solid(font, buf, (SDL_Color){100, 255, 100, 255});
@@ -112,6 +109,7 @@ draw_update(struct body *bodies, size_t bodies_count, bool mass, struct quadtree
     }
     memcpy(&previous_time, &current_time, sizeof previous_time);
     SDL_RenderPresent(renderer);
+    return fps;
 }
 
 static void
@@ -147,10 +145,10 @@ draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
 static void
 draw_quadtree(struct quadtree *quadtree, unsigned int depth)
 {
-    uint32_t canvas_start_x = (quadtree->start_x / 2.0f + 0.25f) * (float)window_width;
-    uint32_t canvas_start_y = (quadtree->start_y / 2.0f + 0.25f) * (float)window_height;
-    uint32_t canvas_end_x = (quadtree->end_x / 2.0f + 0.25f) * (float)window_width;
-    uint32_t canvas_end_y = (quadtree->end_y / 2.0f + 0.25f) * (float)window_height;
+    int32_t canvas_start_x = (quadtree->start_x / 2.0f + 0.25f) * (float)window_width;
+    int32_t canvas_start_y = (quadtree->start_y / 2.0f + 0.25f) * (float)window_height;
+    int32_t canvas_end_x = (quadtree->end_x / 2.0f + 0.25f) * (float)window_width;
+    int32_t canvas_end_y = (quadtree->end_y / 2.0f + 0.25f) * (float)window_height;
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
     SDL_Rect r = {
         .x = canvas_start_x,

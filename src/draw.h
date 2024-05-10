@@ -15,7 +15,7 @@ void
 draw_quit();
 void
 draw_handle_events(bool *running, bool *paused);
-void
+long int
 draw_update(struct body *bodies, size_t bodies_count, bool mass, struct quadtree *quadtree);
 
 #endif

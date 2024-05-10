@@ -181,7 +181,16 @@ quadtree_force(const struct quadtree *quadtree,
         return;
     if (quadtree->type == QUADTREE_EXTERNAL)  // quadtree is a group bodies
     {
+#if QUADTREE_MAX_BODIES_COUNT == 8
         body_gravitational_force_avx2(body, quadtree->external.bodies, gravity, force_x, force_y);
+#elif QUADTREE_MAX_BODIES_COUNT == 16
+        body_gravitational_force_avx2(body, quadtree->external.bodies, gravity, force_x, force_y);
+        body_gravitational_force_avx2(body, quadtree->external.bodies + 8, gravity, force_x, force_y);
+#elif QUADTREE_MAX_BODIES_COUNT == 32
+        body_gravitational_force_avx2(body, quadtree->external.bodies, gravity, force_x, force_y);
+        body_gravitational_force_avx2(body, quadtree->external.bodies + 8, gravity, force_x, force_y);
+        body_gravitational_force_avx2(body, quadtree->external.bodies + 16, gravity, force_x, force_y);
+#endif
         return;
     }
     // Check if we can approximate internal node
