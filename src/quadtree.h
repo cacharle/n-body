@@ -52,7 +52,7 @@ struct quadtree_stats
 };
 
 struct quadtree *
-quadtree_new(void);
+quadtree_new(struct body *bodies, size_t bodies_count);
 void
 quadtree_destroy(struct quadtree *quadtree);
 void

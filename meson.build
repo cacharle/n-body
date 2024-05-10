@@ -4,7 +4,7 @@ project(
   'cuda',
   default_options : [
     'c_std=c11',
-    'warning_level=everything',
+    'warning_level=2',
     'optimization=3',
   ],
 )

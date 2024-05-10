@@ -8,13 +8,31 @@ in_boundary(struct quadtree *quadtree, struct body body)
            body.y >= quadtree->start_y;
 }
 
-struct quadtree *
-quadtree_new(void)
+static struct quadtree*
+quadtree_new_no_bounding_box()
 {
     struct quadtree *quadtree = malloc(sizeof(struct quadtree));
     assert(quadtree != NULL);
     memset(quadtree, 0, sizeof *quadtree);
     quadtree->type = QUADTREE_EMPTY;
+    return quadtree;
+}
+
+struct quadtree *
+quadtree_new(struct body *bodies, size_t bodies_count)
+{
+    struct quadtree *quadtree = quadtree_new_no_bounding_box();
+    quadtree->start_x = INFINITY;
+    quadtree->start_y = INFINITY;
+    quadtree->end_x = -INFINITY;
+    quadtree->end_y = -INFINITY;
+    for (size_t i = 0; i < bodies_count; i++)
+    {
+        if (bodies[i].x < quadtree->start_x) quadtree->start_x = bodies[i].x;
+        if (bodies[i].y < quadtree->start_y) quadtree->start_y = bodies[i].y;
+        if (bodies[i].x > quadtree->end_x) quadtree->end_x = bodies[i].x;
+        if (bodies[i].y > quadtree->end_y) quadtree->end_y = bodies[i].y;
+    }
     return quadtree;
 }
 
@@ -54,10 +72,10 @@ quadtree_insert(struct quadtree *quadtree, struct body body)
         quadtree->type = QUADTREE_INTERNAL;
         struct body original_bodies[QUADTREE_MAX_BODIES_COUNT];
         memcpy(original_bodies, quadtree->external.bodies, sizeof original_bodies);
-        quadtree->internal.nw = quadtree_new();
-        quadtree->internal.ne = quadtree_new();
-        quadtree->internal.sw = quadtree_new();
-        quadtree->internal.se = quadtree_new();
+        quadtree->internal.nw = quadtree_new_no_bounding_box();
+        quadtree->internal.ne = quadtree_new_no_bounding_box();
+        quadtree->internal.sw = quadtree_new_no_bounding_box();
+        quadtree->internal.se = quadtree_new_no_bounding_box();
         float mid_x = quadtree->start_x + (quadtree->end_x - quadtree->start_x) / 2.0f;
         float mid_y = quadtree->start_y + (quadtree->end_y - quadtree->start_y) / 2.0f;
         // nw

@@ -110,7 +110,7 @@ main(int argc, char **argv)
             break;
         case 'g':
             errno = 0;
-            gravity = strtod(optarg, NULL);
+            gravity = strtof(optarg, NULL);
             if (errno != 0)
                 die("Invalid argument to -w: %s", optarg);
             break;
@@ -136,7 +136,7 @@ main(int argc, char **argv)
     {
         flag_bodies_initialization_function(&bodies[i]);
         if (flag_mass)
-            bodies[i].mass = frand() + 0.3;
+            bodies[i].mass = frand() + 0.3f;
     }
     if (flag_black_hole)
     {
@@ -162,11 +162,7 @@ main(int argc, char **argv)
         }
         // update_bodies_naive(bodies, bodies_count, gravity);
         // Create a quadtree
-        struct quadtree *bodies_quadtree = quadtree_new();
-        bodies_quadtree->start_x = -1.0;
-        bodies_quadtree->start_y = -1.0;
-        bodies_quadtree->end_x = 2.0;
-        bodies_quadtree->end_y = 2.0;
+        struct quadtree *bodies_quadtree = quadtree_new(bodies, bodies_count);
         for (size_t i = 0; i < bodies_count; i++)
             quadtree_insert(bodies_quadtree, bodies[i]);
         quadtree_update_mass(bodies_quadtree);

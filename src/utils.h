@@ -11,7 +11,7 @@
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 
 void
-die(char *format, ...);
+die(const char *format, ...);
 void *
 xmalloc(size_t size);
 float

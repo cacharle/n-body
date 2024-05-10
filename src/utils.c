@@ -1,7 +1,7 @@
 #include "utils.h"
 
 void
-die(char *format, ...)
+die(const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
