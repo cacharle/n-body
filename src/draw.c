@@ -114,19 +114,18 @@ draw_update(struct body *bodies, size_t bodies_count, bool mass, struct quadtree
     SDL_RenderPresent(renderer);
 }
 
-static SDL_Point *bodies_points = NULL;
-
 static void
 draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
 {
+    static SDL_Point *bodies_points = NULL;
     if (bodies_points == NULL)
         bodies_points = xmalloc(sizeof(SDL_Point) * bodies_count);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 100);
     size_t points_i = 0;
     for (size_t i = 0; i < bodies_count; i++)
     {
-        uint32_t canvas_x = (bodies[i].x / 2.0 + 0.25) * (float)window_width;
-        uint32_t canvas_y = (bodies[i].y / 2.0 + 0.25) * (float)window_height;
+        uint32_t canvas_x = (bodies[i].x / 2.0f + 0.25f) * (float)window_width;
+        uint32_t canvas_y = (bodies[i].y / 2.0f + 0.25f) * (float)window_height;
         if (!mass)
         {
             if (canvas_x < 0 || canvas_x > window_width || canvas_y < 0 || canvas_y > window_height)
@@ -148,13 +147,18 @@ draw_bodies(struct body *bodies, size_t bodies_count, bool mass)
 static void
 draw_quadtree(struct quadtree *quadtree, unsigned int depth)
 {
-    uint32_t canvas_start_x = quadtree->start_x * (float)window_width;
-    uint32_t canvas_start_y = quadtree->start_y * (float)window_height;
-    uint32_t canvas_end_x = quadtree->end_x * (float)window_width;
-    uint32_t canvas_end_y = quadtree->end_y * (float)window_height;
+    uint32_t canvas_start_x = (quadtree->start_x / 2.0f + 0.25f) * (float)window_width;
+    uint32_t canvas_start_y = (quadtree->start_y / 2.0f + 0.25f) * (float)window_height;
+    uint32_t canvas_end_x = (quadtree->end_x / 2.0f + 0.25f) * (float)window_width;
+    uint32_t canvas_end_y = (quadtree->end_y / 2.0f + 0.25f) * (float)window_height;
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
-    SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_end_x, canvas_start_y);
-    SDL_RenderDrawLine(renderer, canvas_start_x, canvas_start_y, canvas_start_x, canvas_end_y);
+    SDL_Rect r = {
+        .x = canvas_start_x,
+        .y = canvas_start_y,
+        .w = canvas_end_x - canvas_start_x,
+        .h = canvas_end_y - canvas_start_y,
+    };
+    SDL_RenderDrawRect(renderer, &r);
     if (quadtree->type == QUADTREE_INTERNAL)
     {
         draw_quadtree(quadtree->internal.nw, depth + 1);

@@ -81,29 +81,29 @@ body_gravitational_force_avx2(const struct body *dest_body,
     *force_y = 0.0;
 
     const __m256 bodies_x = _mm256_set_ps(bodies[0].x,
-                                    bodies[1].x,
-                                    bodies[2].x,
-                                    bodies[3].x,
-                                    bodies[4].x,
-                                    bodies[5].x,
-                                    bodies[6].x,
-                                    bodies[7].x);
+                                          bodies[1].x,
+                                          bodies[2].x,
+                                          bodies[3].x,
+                                          bodies[4].x,
+                                          bodies[5].x,
+                                          bodies[6].x,
+                                          bodies[7].x);
     const __m256 bodies_y = _mm256_set_ps(bodies[0].y,
-                                    bodies[1].y,
-                                    bodies[2].y,
-                                    bodies[3].y,
-                                    bodies[4].y,
-                                    bodies[5].y,
-                                    bodies[6].y,
-                                    bodies[7].y);
+                                          bodies[1].y,
+                                          bodies[2].y,
+                                          bodies[3].y,
+                                          bodies[4].y,
+                                          bodies[5].y,
+                                          bodies[6].y,
+                                          bodies[7].y);
     const __m256 bodies_mass = _mm256_set_ps(bodies[0].mass,
-                                       bodies[1].mass,
-                                       bodies[2].mass,
-                                       bodies[3].mass,
-                                       bodies[4].mass,
-                                       bodies[5].mass,
-                                       bodies[6].mass,
-                                       bodies[7].mass);
+                                             bodies[1].mass,
+                                             bodies[2].mass,
+                                             bodies[3].mass,
+                                             bodies[4].mass,
+                                             bodies[5].mass,
+                                             bodies[6].mass,
+                                             bodies[7].mass);
 
     const __m256 dest_x = _mm256_set1_ps(dest_body->x);
     const __m256 dest_y = _mm256_set1_ps(dest_body->y);

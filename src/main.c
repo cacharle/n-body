@@ -88,9 +88,7 @@ main(int argc, char **argv)
             if (errno != 0)
                 die("Invalid argument to -b: %s", optarg);
             break;
-        case 'o':
-            flag_black_hole = true;
-            break;
+        case 'o': flag_black_hole = true; break;
         case 'w':
             errno = 0;
             threads_count = strtoul(optarg, NULL, 10);
@@ -170,18 +168,21 @@ main(int argc, char **argv)
         {
             struct quadtree_stats stats = {0};
             quadtree_stats(bodies_quadtree, &stats);
-            printf(
-                "stats:\n"
-                "\tnode count:     %5zu\n"
-                "\tempty count:    %5zu\n"
-                "\texternal count: %5zu, average bodies in external %5.1f\n"
-                "\tInternal count: %5zu\n",
-                stats.node_count,
-                stats.empty_count,
-                stats.external_count,
-                (double)bodies_count / (double)stats.external_count,
-                stats.internal_count
-            );
+            printf("stats:\n"
+                   "\tnode count:     %5zu\n"
+                   "\tempty count:    %5zu\n"
+                   "\texternal count: %5zu, average bodies in external %5.1f\n"
+                   "\tinternal count: %5zu\n"
+                   "\tbounds: % .2f,% .2f -> % .2f,% .2f\n",
+                   stats.node_count,
+                   stats.empty_count,
+                   stats.external_count,
+                   (double)bodies_count / (double)stats.external_count,
+                   stats.internal_count,
+                   (double)bodies_quadtree->start_x,
+                   (double)bodies_quadtree->start_y,
+                   (double)bodies_quadtree->end_x,
+                   (double)bodies_quadtree->end_y);
         }
         // Create threads to compute the gravitational forces
         size_t stride = bodies_count / threads_count;
@@ -197,7 +198,6 @@ main(int argc, char **argv)
         for (size_t i = 0; i < threads_count; i++)
             pthread_join(threads[i], NULL);
         draw_update(bodies, bodies_count, flag_mass, flag_debug ? bodies_quadtree : NULL);
-        // // draw_update(bodies, bodies_count, flag_mass, NULL);
         quadtree_destroy(bodies_quadtree);
         // SDL_Delay(100);
     }

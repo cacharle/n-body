@@ -8,7 +8,7 @@ in_boundary(struct quadtree *quadtree, struct body body)
            body.y >= quadtree->start_y;
 }
 
-static struct quadtree*
+static struct quadtree *
 quadtree_new_no_bounding_box()
 {
     struct quadtree *quadtree = malloc(sizeof(struct quadtree));
@@ -28,10 +28,14 @@ quadtree_new(struct body *bodies, size_t bodies_count)
     quadtree->end_y = -INFINITY;
     for (size_t i = 0; i < bodies_count; i++)
     {
-        if (bodies[i].x < quadtree->start_x) quadtree->start_x = bodies[i].x;
-        if (bodies[i].y < quadtree->start_y) quadtree->start_y = bodies[i].y;
-        if (bodies[i].x > quadtree->end_x) quadtree->end_x = bodies[i].x;
-        if (bodies[i].y > quadtree->end_y) quadtree->end_y = bodies[i].y;
+        if (bodies[i].x < quadtree->start_x)
+            quadtree->start_x = bodies[i].x;
+        if (bodies[i].y < quadtree->start_y)
+            quadtree->start_y = bodies[i].y;
+        if (bodies[i].x > quadtree->end_x)
+            quadtree->end_x = bodies[i].x;
+        if (bodies[i].y > quadtree->end_y)
+            quadtree->end_y = bodies[i].y;
     }
     return quadtree;
 }
